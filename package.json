@@ -1,0 +1,12 @@
+{
+  "name": "usage_survey",
+  "version": "1.0.0",
+  "description": "A dashboard to make stats of redirection usage",
+  "main": "index.js",
+  "author": "N.Shimizu <chikoski@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^0.10.0",
+    "webpack": "2"
+  }
+}
