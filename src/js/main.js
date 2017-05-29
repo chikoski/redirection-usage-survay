@@ -1,28 +1,6 @@
-import Config from "./config";
+import Bootloader from "./bootloader";
 
-function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    const elm = document.createElement("script");
-    elm.src = url;
-    elm.addEventListener("load", e => {
-      resolve(url);
-    })
-    window.document.body.appendChild(elm);
-  });
-}
+const selector = "#app";
+const configFile = "config.json";
 
-function initAPI() {
-  return gapi.client.init(Config).then()
-}
-
-function initUI() {
-
-}
-
-function start() {
-  return initAPI().then(initUI);
-}
-
-window.addEventListener("DOMContentLoaded", e => {
-  return loadScript(Config.api).then(start)
-});
+Bootloader.boot(configFile, selector);

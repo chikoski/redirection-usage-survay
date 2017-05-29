@@ -1,2 +1,4 @@
 node_modules/*
 .vscode/*
+etc/*
+docs/config.json
