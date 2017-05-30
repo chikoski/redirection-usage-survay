@@ -1,6 +1,11 @@
 import { Component, DOM as dom, createFactory } from "react";
 
 class Item extends Component {
+  renderStats() {
+    const model = this.props.model;
+    const count = model.visits;
+    return Number.isNaN(count) ? "n/a" : count + "";
+  }
   render() {
     const model = this.props.model;
     return dom.li({},
@@ -8,7 +13,7 @@ class Item extends Component {
       dom.span({ className: "long-url" },
         dom.a({ href: model.longUrl }, model.longUrl)
       ),
-      dom.span({ className: "stats" }, "n/a")
+      dom.span({ className: "stats" }, this.renderStats())
     )
   }
 }
