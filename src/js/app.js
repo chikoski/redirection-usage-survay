@@ -1,8 +1,10 @@
 import { createFactory } from "react";
 import ReactDOM from "react-dom";
 import DashBoard from "./scenes/dashboard";
+import SignIn from "./scenes/SignIn";
 import Splash from "./components/splash";
 import { DashBoard as DashBoardComponent } from "./components/dashboard";
+
 
 const renderSplash = createFactory(Splash);
 const renderDashboard = createFactory(DashBoardComponent);
@@ -12,7 +14,8 @@ class App {
     this.api = api;
     this.container = container;
     this.scenes = {
-      "dashboard": new DashBoard({ api: api, app: this, renderer: renderDashboard })
+      "dashboard": new DashBoard({ api: api, app: this, renderer: renderDashboard }),
+      "signin": new SignIn({ api: api, app: this, renderer: renderSplash }),
     };
   }
   get isSignedIn() {
@@ -28,14 +31,20 @@ class App {
   }
   start() {
     if (this.signIn) {
-      return this.signIn();
+      this.signIn();
     } else {
-      ReactDOM.render(renderSplash({ app: this }), this.container);
-      return Promise.resolve(this);
+      this.scene = "signin";
+      this.update();
     }
   }
   signIn() {
     this.api.signIn().then(api => this.list());
+  }
+  signout() {
+    this.api.signOut().then(res => {
+      this.scene = "signin";
+      this.update();
+    })
   }
   list() {
     this.scene = "dashboard";

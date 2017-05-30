@@ -41,6 +41,9 @@ class DashBoard extends Scene {
         return file.update();
       }).then(res => console.log(res));
   }
+  signout() {
+    this.app.signout();
+  }
   render() {
     return this.renderer(this.props({
       histories: this.histories,

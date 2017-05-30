@@ -9646,23 +9646,27 @@ class API {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom__ = __webpack_require__(100);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react_dom__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scenes_dashboard__ = __webpack_require__(189);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_splash__ = __webpack_require__(186);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_dashboard__ = __webpack_require__(184);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scenes_SignIn__ = __webpack_require__(198);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_splash__ = __webpack_require__(186);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__components_dashboard__ = __webpack_require__(184);
 
 
 
 
 
 
-const renderSplash = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_3__components_splash__["a" /* default */]);
-const renderDashboard = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_4__components_dashboard__["a" /* DashBoard */]);
+
+
+const renderSplash = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_4__components_splash__["a" /* default */]);
+const renderDashboard = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_5__components_dashboard__["a" /* DashBoard */]);
 
 class App {
   constructor({ api, container }) {
     this.api = api;
     this.container = container;
     this.scenes = {
-      "dashboard": new __WEBPACK_IMPORTED_MODULE_2__scenes_dashboard__["a" /* default */]({ api: api, app: this, renderer: renderDashboard })
+      "dashboard": new __WEBPACK_IMPORTED_MODULE_2__scenes_dashboard__["a" /* default */]({ api: api, app: this, renderer: renderDashboard }),
+      "signin": new __WEBPACK_IMPORTED_MODULE_3__scenes_SignIn__["a" /* default */]({ api: api, app: this, renderer: renderSplash }),
     };
   }
   get isSignedIn() {
@@ -9678,14 +9682,20 @@ class App {
   }
   start() {
     if (this.signIn) {
-      return this.signIn();
+      this.signIn();
     } else {
-      __WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(renderSplash({ app: this }), this.container);
-      return Promise.resolve(this);
+      this.scene = "signin";
+      this.update();
     }
   }
   signIn() {
     this.api.signIn().then(api => this.list());
+  }
+  signout() {
+    this.api.signOut().then(res => {
+      this.scene = "signin";
+      this.update();
+    })
   }
   list() {
     this.scene = "dashboard";
@@ -22231,6 +22241,9 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         onClick: e => this.props.scene.export()
       }, "スプレッドシートへ出力"),
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
+        onClick: e => this.props.scene.signout(),
+      }, "サインアウト"),
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
         onClick: e => {
           const nextState = !this.state.showSettings;
           this.setState({ showSettings: nextState })
@@ -22495,6 +22508,9 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
         }
         return file.update();
       }).then(res => console.log(res));
+  }
+  signout() {
+    this.app.signout();
   }
   render() {
     return this.renderer(this.props({
@@ -22827,7 +22843,6 @@ class ShortUrl {
 class Settings extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
   render() {
     return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({ className: "settings" },
-      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].h2({}, "設定"),
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({},
         __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].h3({}, "記録するスプレッドシート"),
         __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].input({
@@ -22862,6 +22877,25 @@ class Row extends __WEBPACK_IMPORTED_MODULE_0__cachable__["b" /* default */] {
   constructor(values = []) {
     super();
     this.values = values;
+  }
+}
+
+
+
+
+/***/ }),
+/* 198 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SignIn; });
+/* unused harmony export SignIn */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scene__ = __webpack_require__(190);
+
+
+class SignIn extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] {
+  render() {
+    return this.renderer({ app: this.app });
   }
 }
 

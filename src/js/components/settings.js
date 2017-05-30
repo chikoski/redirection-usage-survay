@@ -3,7 +3,6 @@ import { DOM as dom, Component } from "react";
 class Settings extends Component {
   render() {
     return dom.div({ className: "settings" },
-      dom.h2({}, "設定"),
       dom.div({},
         dom.h3({}, "記録するスプレッドシート"),
         dom.input({

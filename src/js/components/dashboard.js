@@ -20,6 +20,9 @@ class DashBoard extends Component {
         onClick: e => this.props.scene.export()
       }, "スプレッドシートへ出力"),
       dom.button({
+        onClick: e => this.props.scene.signout(),
+      }, "サインアウト"),
+      dom.button({
         onClick: e => {
           const nextState = !this.state.showSettings;
           this.setState({ showSettings: nextState })
