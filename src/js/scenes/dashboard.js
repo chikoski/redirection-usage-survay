@@ -5,6 +5,7 @@ class DashBoard extends Scene {
   constructor(config) {
     super(config);
     this.histories = [];
+    this.isExportable = false;
   }
   start(startToken = null) {
     this.api.list(startToken).then(response => {
@@ -20,11 +21,14 @@ class DashBoard extends Scene {
     });
   }
   loadAnalytics() {
-    for (const item of this.histories) {
-      this.api
+    Promise.all(this.histories.map(item => {
+      return this.api
         .loadAnalytics(item)
         .then(res => this.app.update());
-    }
+    })).then(response => {
+      this.isExportable = true;
+      this.app.update();
+    });
   }
   export() {
     api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
@@ -40,7 +44,8 @@ class DashBoard extends Scene {
   render() {
     return this.renderer(this.props({
       histories: this.histories,
-      scene: this
+      scene: this,
+      exportable: this.isExportable
     }))
   }
 }

@@ -16,6 +16,7 @@ class DashBoard extends Component {
     return dom.div({ className: "controls" },
       dom.button({
         className: "primary",
+        disabled: !this.props.exportable,
         onClick: e => this.props.scene.export()
       }, "スプレッドシートへ出力"),
       dom.button({

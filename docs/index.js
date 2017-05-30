@@ -22227,6 +22227,7 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
     return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({ className: "controls" },
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
         className: "primary",
+        disabled: !this.props.exportable,
         onClick: e => this.props.scene.export()
       }, "スプレッドシートへ出力"),
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
@@ -22459,6 +22460,7 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
   constructor(config) {
     super(config);
     this.histories = [];
+    this.isExportable = false;
   }
   start(startToken = null) {
     this.api.list(startToken).then(response => {
@@ -22474,11 +22476,14 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
     });
   }
   loadAnalytics() {
-    for (const item of this.histories) {
-      this.api
+    Promise.all(this.histories.map(item => {
+      return this.api
         .loadAnalytics(item)
         .then(res => this.app.update());
-    }
+    })).then(response => {
+      this.isExportable = true;
+      this.app.update();
+    });
   }
   export() {
     api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
@@ -22494,7 +22499,8 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
   render() {
     return this.renderer(this.props({
       histories: this.histories,
-      scene: this
+      scene: this,
+      exportable: this.isExportable
     }))
   }
 }
