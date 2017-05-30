@@ -67,6 +67,18 @@ class API {
       startToken: startToken
     }));
   }
+  loadAnalytics(item) {
+    return new Promise((resolve, reject) => {
+      this.api.client.urlshortener.url.get({
+        shortUrl: item.shortUrl,
+        projection: "FULL"
+      }).then(res => {
+        const stats = res.result.analytics.month;
+        item.stats = stats;
+        resolve(item)
+      }, err => reject(err));
+    });
+  }
   create() {
     return this.spreadsheet
       .create()
@@ -75,7 +87,12 @@ class API {
       });
   }
   open(spreadsheetId) {
-    return Promise.resolve(this.spreadsheet.get({ spreadsheetId: spreadsheetId }))
+    if (spreadsheetId) {
+      return this.spreadsheet.get({ spreadsheetId: spreadsheetId })
+        .then(res => SpreadSeet.create(res, this), res => this.create())
+    } else {
+      return this.create();
+    }
   }
   static load({ key, clientId }) {
     return load(endPoints.api).then(() => {

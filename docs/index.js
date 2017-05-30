@@ -9590,6 +9590,18 @@ class API {
       startToken: startToken
     }));
   }
+  loadAnalytics(item) {
+    return new Promise((resolve, reject) => {
+      this.api.client.urlshortener.url.get({
+        shortUrl: item.shortUrl,
+        projection: "FULL"
+      }).then(res => {
+        const stats = res.result.analytics.month;
+        item.stats = stats;
+        resolve(item)
+      }, err => reject(err));
+    });
+  }
   create() {
     return this.spreadsheet
       .create()
@@ -9598,7 +9610,12 @@ class API {
       });
   }
   open(spreadsheetId) {
-    return Promise.resolve(this.spreadsheet.get({ spreadsheetId: spreadsheetId }))
+    if (spreadsheetId) {
+      return this.spreadsheet.get({ spreadsheetId: spreadsheetId })
+        .then(res => __WEBPACK_IMPORTED_MODULE_0__models_spreadsheet__["a" /* default */].create(res, this), res => this.create())
+    } else {
+      return this.create();
+    }
   }
   static load({ key, clientId }) {
     return load(endPoints.api).then(() => {
@@ -9645,9 +9662,11 @@ class App {
     this.api = api;
     this.container = container;
     window.addEventListener("beforeunload", e => {
+      /*
       this.api.signOut().then(() => {
         console.log("Signed out");
       })
+      */
     }, { once: true });
     this.scenes = {
       "dashboard": new __WEBPACK_IMPORTED_MODULE_2__scenes_dashboard__["a" /* default */]({ api: api, app: this, renderer: renderDashboard })
@@ -9665,8 +9684,12 @@ class App {
     this.currentScene.start();
   }
   start() {
-    __WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(renderSplash({ app: this }), this.container);
-    return Promise.resolve(this);
+    if (this.signIn) {
+      return this.signIn();
+    } else {
+      __WEBPACK_IMPORTED_MODULE_1_react_dom___default.a.render(renderSplash({ app: this }), this.container);
+      return Promise.resolve(this);
+    }
   }
   signIn() {
     this.api.signIn().then(api => this.list());
@@ -22235,6 +22258,11 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
 
 
 class Item extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
+  renderStats() {
+    const model = this.props.model;
+    const count = model.visits;
+    return Number.isNaN(count) ? "n/a" : count + "";
+  }
   render() {
     const model = this.props.model;
     return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].li({},
@@ -22242,7 +22270,7 @@ class Item extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].span({ className: "long-url" },
         __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].a({ href: model.longUrl }, model.longUrl)
       ),
-      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].span({ className: "stats" }, "n/a")
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].span({ className: "stats" }, this.renderStats())
     )
   }
 }
@@ -22316,64 +22344,79 @@ __WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot(configFile, se
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SpreadSheet; });
 /* unused harmony export SpreadSheet */
-function clone(obj) {
-  const ret = {};
-  for (const attr in obj) {
-    ret[attr] = obj[attr];
-  }
-  return ret;
-}
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__request__ = __webpack_require__(192);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sheet__ = __webpack_require__(193);
 
-function propertyUpdateRequest(diff) {
-  return {
-    updateSpreadsheetProperties: {
-      properties: diff,
-      fields: Object.keys(diff).join(",")
-    }
-  }
-}
+
 
 class SpreadSheet {
   constructor(sheet, api) {
-    this.sheet = sheet;
+    this.original = sheet;
     this.api = api;
     this.resuests = [];
-    this.originalProperties = clone(sheet.properties);
+    this.properties = {};
+    this.sheets =
+      sheet.sheets.map(sheet => {
+        const props = sheet.properties;
+        return new __WEBPACK_IMPORTED_MODULE_1__sheet__["a" /* default */](props.sheetId, props.title)
+      });
   }
   get spreadsheetId() {
-    return this.sheet.spreadsheetId;
+    return this.original.spreadsheetId;
   }
   get spreadsheetUrl() {
-    return this.sheet.spreadsheetUrl;
+    return this.original.spreadsheetUrl;
   }
   get title() {
-    return this.sheet.properties.title;
+    return this.properties.title ||
+      this.original.properties.title;
   }
   set title(newTitle) {
-    this.sheet.properties.title = newTitle;
+    this.properties.title = newTitle;
+  }
+  addSeet(title) {
+    if (title == null) {
+      const now = new Date();
+      title = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    }
+    const sheet = __WEBPACK_IMPORTED_MODULE_1__sheet__["a" /* default */].create(this.sheets.length + 1, title);
+    console.log(sheet);
+    this.sheets.push(sheet);
+    return sheet;
   }
   diff() {
     const d = {};
-    for (const attr in this.originalProperties) {
-      if (this.originalProperties[attr] != this.sheet.properties[attr]) {
-        d[attr] = this.sheet.properties[attr];
+    for (const attr in this.properties) {
+      if (this.original.properties[attr] != this.properties[attr]) {
+        d[attr] = this.properties[attr];
       }
     }
     return d;
   }
   toRequest() {
-    return {
-      spreadsheetId: this.spreadsheetId,
-      requests: [
-        propertyUpdateRequest(this.diff())
-      ]
-    };
+    const req = new __WEBPACK_IMPORTED_MODULE_0__request__["a" /* default */](this);
+    return req
+      .updateProperty()
+      .addSheet()
+      .product;
   }
   update() {
-    return this.api
-      .spreadsheet
-      .batchUpdate(this.toRequest());
+    return new Promise((resolve, reject) => {
+      this.api
+        .spreadsheet
+        .batchUpdate(this.toRequest())
+        .then(res => {
+          this.afterUpdate();
+          resolve(res);
+        }, error => reject(error));
+    });
   }
+  afterUpdate() {
+    for (sheet of this.sheets) {
+      sheet.clearFlags();
+    }
+  }
+
 
   static create(response, api) {
     const sheet = response.result;
@@ -22392,6 +22435,8 @@ class SpreadSheet {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DashBoard; });
 /* unused harmony export DashBoard */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scene__ = __webpack_require__(190);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__models_short_url__ = __webpack_require__(195);
+
 
 
 class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] {
@@ -22402,14 +22447,22 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
   start(startToken = null) {
     this.api.list(startToken).then(response => {
       const result = response.result;
-      const items = result.items;
-      this.histories = this.histories.concat(result.items);
+      const items = result.items.map(item => new __WEBPACK_IMPORTED_MODULE_1__models_short_url__["a" /* default */](item));
+      this.histories = this.histories.concat(items);
       if (this.histories.length < result.totalItems) {
         this.start(result.startToken);
       } else {
         this.app.update();
+        this.loadAnalytics();
       }
     });
+  }
+  loadAnalytics() {
+    for (const item of this.histories) {
+      this.api
+        .loadAnalytics(item)
+        .then(res => this.app.update());
+    }
   }
   export() {
     console.log("export histories as a spreadsheet");
@@ -22496,6 +22549,181 @@ const Bootloader = {
       .catch(error => console.log(error));
   }
 };
+
+
+
+
+/***/ }),
+/* 192 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Request; });
+/* unused harmony export Request */
+function addSheetRequest(sheet, index) {
+  return {
+    addSheet: {
+      properties: {
+        sheetId: sheet.id,
+        title: sheet.title,
+        index: index
+      }
+    }
+  }
+}
+
+class Request {
+  constructor(spreadsheet) {
+    this.target = spreadsheet;
+    this.product = {
+      spreadsheetId: this.target.spreadsheetId,
+      requests: []
+    }
+  }
+
+  add(req) {
+    this.product.requests.push(req);
+    return this;
+  }
+
+  updateProperty() {
+    const d = this.target.diff();
+    const keys = Object.keys(d);
+    if (keys.length == 0) {
+      return this;
+    }
+    const req = {
+      updateSpreadsheetProperties: {
+        properties: d,
+        fields: Object.keys(d).join(",")
+      }
+    }
+    return this.add(req);
+  }
+
+  addSheet() {
+    this.target
+      .sheets.filter(sheet => sheet.isCreated)
+      .map((sheet, index) => addSheetRequest(sheet, index))
+      .forEach(req => this.add(req));
+    return this;
+  }
+
+}
+
+
+
+
+/***/ }),
+/* 193 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Sheet; });
+/* unused harmony export Sheet */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cachable__ = __webpack_require__(194);
+
+
+class Sheet extends __WEBPACK_IMPORTED_MODULE_0__cachable__["a" /* Cachable */] {
+  constructor(id, title) {
+    super();
+    this.properties = {
+      id: id,
+      title: title
+    }
+    this.rows = [];
+  }
+  get id() {
+    return this.properties.id;
+  }
+  get title() {
+    return this.properties.title;
+  }
+  set title(newTitle) {
+    this.properties.title = newTitle;
+  }
+  notModified() {
+    super.notModified();
+    for (const row of this.rows) {
+      row.notModified();
+    }
+  }
+  static create(id, title) {
+    const product = new Sheet(id, title);
+    product.created();
+    return product;
+  }
+}
+
+
+
+
+/***/ }),
+/* 194 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Cachable; });
+/* unused harmony export CREATED */
+/* unused harmony export NOT_MODIFIED */
+const NOT_MODIFIED = 0;
+const CREATED = 1;
+const MODIFIED = 2;
+
+class Cachable {
+  constructor(flag = NOT_MODIFIED) {
+    this.flag = flag;
+  }
+  get isNotModified() {
+    return this.flag == NOT_MODIFIED;
+  }
+  get isModified() {
+    return this.flag == MODIFIED;
+  }
+  get isCreated() {
+    return this.flag & CREATED;
+  }
+  created() {
+    this.flag = CREATED;
+    return this;
+  }
+  modified() {
+    this.flag = MODIFIED;
+    return this;
+  }
+  notModified() {
+    this.flag = NOT_MODIFIED;
+  }
+}
+
+
+
+
+/***/ }),
+/* 195 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ShortUrl; });
+/* unused harmony export ShortUrl */
+class ShortUrl {
+  constructor({ id, longUrl, status }) {
+    this.id = id;
+    this.longUrl = longUrl;
+    this.status = status;
+    this.stats = null;
+  }
+  get shortUrl() {
+    return this.id;
+  }
+  get hasStats() {
+    return this.stats;
+  }
+  get visits() {
+    return this.hasStats ? this.stats.shortUrlClicks : NaN;
+  }
+}
 
 
 
