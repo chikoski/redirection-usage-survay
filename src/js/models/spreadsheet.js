@@ -1,6 +1,11 @@
 import Request from "./request";
 import Sheet from "./sheet";
 
+function defaultSheetTitle() {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
 class SpreadSheet {
   constructor(sheet, api) {
     this.original = sheet;
@@ -26,15 +31,15 @@ class SpreadSheet {
   set title(newTitle) {
     this.properties.title = newTitle;
   }
-  addSeet(title) {
-    if (title == null) {
-      const now = new Date();
-      title = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-    }
+  addSeet(title = defaultSheetTitle()) {
     const sheet = Sheet.create(this.sheets.length + 1, title);
     console.log(sheet);
     this.sheets.push(sheet);
     return sheet;
+  }
+  findOrAddSheet(title = defaultSheetTitle()) {
+    return this.sheets.find(sheet => sheet.title === title) ||
+      this.addSeet(title);
   }
   diff() {
     const d = {};
@@ -50,6 +55,7 @@ class SpreadSheet {
     return req
       .updateProperty()
       .addSheet()
+      .updateValues()
       .product;
   }
   update() {
@@ -64,11 +70,10 @@ class SpreadSheet {
     });
   }
   afterUpdate() {
-    for (sheet of this.sheets) {
-      sheet.clearFlags();
+    for (const sheet of this.sheets) {
+      sheet.notModified();
     }
   }
-
 
   static create(response, api) {
     const sheet = response.result;

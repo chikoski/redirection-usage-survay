@@ -9661,13 +9661,6 @@ class App {
   constructor({ api, container }) {
     this.api = api;
     this.container = container;
-    window.addEventListener("beforeunload", e => {
-      /*
-      this.api.signOut().then(() => {
-        console.log("Signed out");
-      })
-      */
-    }, { once: true });
     this.scenes = {
       "dashboard": new __WEBPACK_IMPORTED_MODULE_2__scenes_dashboard__["a" /* default */]({ api: api, app: this, renderer: renderDashboard })
     };
@@ -22215,18 +22208,33 @@ module.exports = traverseAllChildren;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__history__ = __webpack_require__(185);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__settings__ = __webpack_require__(196);
+
 
 
 
 const renderHistories = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_1__history__["a" /* History */]);
+const renderSettings = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_react__["createFactory"])(__WEBPACK_IMPORTED_MODULE_2__settings__["a" /* Settings */]);
 
 class DashBoard extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showSettings: false
+    };
+  }
   renderControl() {
     return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({ className: "controls" },
       __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
         className: "primary",
         onClick: e => this.props.scene.export()
-      }, "スプレッドシートへ出力")
+      }, "スプレッドシートへ出力"),
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
+        onClick: e => {
+          const nextState = !this.state.showSettings;
+          this.setState({ showSettings: nextState })
+        }
+      }, "設定")
     )
   }
   renderHeader() {
@@ -22238,7 +22246,10 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
   render() {
     return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].article({ className: "dashboard" },
       this.renderHeader(),
-      renderHistories({ histories: this.props.histories })
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({ className: "container" },
+        renderHistories({ histories: this.props.histories }),
+        this.state.showSettings ? renderSettings({ scene: this.props.scene, app: this.props.app }) : null,
+      ),
     )
   }
 }
@@ -22349,6 +22360,11 @@ __WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot(configFile, se
 
 
 
+function defaultSheetTitle() {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
 class SpreadSheet {
   constructor(sheet, api) {
     this.original = sheet;
@@ -22374,15 +22390,15 @@ class SpreadSheet {
   set title(newTitle) {
     this.properties.title = newTitle;
   }
-  addSeet(title) {
-    if (title == null) {
-      const now = new Date();
-      title = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-    }
+  addSeet(title = defaultSheetTitle()) {
     const sheet = __WEBPACK_IMPORTED_MODULE_1__sheet__["a" /* default */].create(this.sheets.length + 1, title);
     console.log(sheet);
     this.sheets.push(sheet);
     return sheet;
+  }
+  findOrAddSheet(title = defaultSheetTitle()) {
+    return this.sheets.find(sheet => sheet.title === title) ||
+      this.addSeet(title);
   }
   diff() {
     const d = {};
@@ -22398,6 +22414,7 @@ class SpreadSheet {
     return req
       .updateProperty()
       .addSheet()
+      .updateValues()
       .product;
   }
   update() {
@@ -22412,11 +22429,10 @@ class SpreadSheet {
     });
   }
   afterUpdate() {
-    for (sheet of this.sheets) {
-      sheet.clearFlags();
+    for (const sheet of this.sheets) {
+      sheet.notModified();
     }
   }
-
 
   static create(response, api) {
     const sheet = response.result;
@@ -22438,6 +22454,20 @@ class SpreadSheet {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__models_short_url__ = __webpack_require__(195);
 
 
+
+window.hoge = function () {
+  api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
+    .then(file => {
+      const sheet = file.findOrAddSheet();
+      sheet.addRow(["short url", "long url", "clicks"]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      return file.update();
+    }).then(res => console.log(res));
+}
 
 class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] {
   constructor(config) {
@@ -22465,11 +22495,15 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scene__["a" /* default */] 
     }
   }
   export() {
-    console.log("export histories as a spreadsheet");
-    this.api.create().then(file => {
-      console.log(file);
-      console.log(file.spreadsheetUrl);
-    })
+    api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
+      .then(file => {
+        const sheet = file.findOrAddSheet();
+        sheet.addRow(["短縮URL", "リンク先", "表示回数"]);
+        for (const history of this.histories) {
+          sheet.addRow([history.id, history.longUrl, history.visits]);
+        }
+        return file.update();
+      }).then(res => console.log(res));
   }
   render() {
     return this.renderer(this.props({
@@ -22572,6 +22606,48 @@ function addSheetRequest(sheet, index) {
   }
 }
 
+function extendedValue(value) {
+  if (Number.isFinite(value)) {
+    return {
+      "numberValue": value
+    };
+  } else {
+    return {
+      "stringValue": value
+    }
+  }
+}
+
+function rowData(row) {
+  const values =
+    row.values.map(value => {
+      return {
+        userEnteredValue: extendedValue(value)
+      }
+    });
+  return {
+    values: values
+  }
+}
+
+function updateCellsRequest(sheet) {
+  const rows =
+    sheet.rows
+      .filter(row => !row.isNotModified)
+      .map(row => rowData(row));
+  return {
+    "updateCells": {
+      start: {
+        sheetId: sheet.id,
+        rowIndex: 0,
+        columnIndex: 0,
+      },
+      rows: rows,
+      fields: "*"
+    }
+  };
+}
+
 class Request {
   constructor(spreadsheet) {
     this.target = spreadsheet;
@@ -22601,6 +22677,14 @@ class Request {
     return this.add(req);
   }
 
+  updateValues() {
+    this.target
+      .sheets.filter(sheet => sheet.isModified)
+      .map(sheet => updateCellsRequest(sheet))
+      .forEach(req => this.add(req));
+    return this;
+  }
+
   addSheet() {
     this.target
       .sheets.filter(sheet => sheet.isCreated)
@@ -22622,6 +22706,8 @@ class Request {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Sheet; });
 /* unused harmony export Sheet */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cachable__ = __webpack_require__(194);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__row__ = __webpack_require__(197);
+
 
 
 class Sheet extends __WEBPACK_IMPORTED_MODULE_0__cachable__["a" /* Cachable */] {
@@ -22648,6 +22734,13 @@ class Sheet extends __WEBPACK_IMPORTED_MODULE_0__cachable__["a" /* Cachable */] 
       row.notModified();
     }
   }
+  addRow(values = []) {
+    const row = new __WEBPACK_IMPORTED_MODULE_1__row__["a" /* default */](values);
+    row.created();
+    this.rows.push(row)
+    this.modified();
+    return this;
+  }
   static create(id, title) {
     const product = new Sheet(id, title);
     product.created();
@@ -22663,7 +22756,7 @@ class Sheet extends __WEBPACK_IMPORTED_MODULE_0__cachable__["a" /* Cachable */] 
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Cachable; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Cachable; });
 /* unused harmony export CREATED */
 /* unused harmony export NOT_MODIFIED */
@@ -22722,6 +22815,61 @@ class ShortUrl {
   }
   get visits() {
     return this.hasStats ? this.stats.shortUrlClicks : NaN;
+  }
+}
+
+
+
+
+/***/ }),
+/* 196 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Settings; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+
+
+class Settings extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
+  render() {
+    return __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({ className: "settings" },
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].h2({}, "設定"),
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].div({},
+        __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].h3({}, "記録するスプレッドシート"),
+        __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].input({
+          type: "text",
+          placeholder: "Google スプレッドシートのURL",
+          value: this.props.spreadsheet,
+          onChange: e => this.setState({ spreadsheet: e.target.value })
+        })),
+      __WEBPACK_IMPORTED_MODULE_0_react__["DOM"].button({
+        onClick: e => this.props.app.setConfig({
+          spreadsheet: this.state.spreadsheet,
+        })
+      }, "保存")
+    )
+  }
+}
+
+
+
+
+/***/ }),
+/* 197 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Row; });
+/* unused harmony export Row */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cachable__ = __webpack_require__(194);
+
+
+class Row extends __WEBPACK_IMPORTED_MODULE_0__cachable__["b" /* default */] {
+  constructor(values = []) {
+    super();
+    this.values = values;
   }
 }
 

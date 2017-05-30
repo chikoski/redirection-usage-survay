@@ -11,11 +11,6 @@ class App {
   constructor({ api, container }) {
     this.api = api;
     this.container = container;
-    window.addEventListener("beforeunload", e => {
-      this.api.signOut().then(() => {
-        console.log("Signed out");
-      })
-    }, { once: true });
     this.scenes = {
       "dashboard": new DashBoard({ api: api, app: this, renderer: renderDashboard })
     };
@@ -32,8 +27,12 @@ class App {
     this.currentScene.start();
   }
   start() {
-    ReactDOM.render(renderSplash({ app: this }), this.container);
-    return Promise.resolve(this);
+    if (this.signIn) {
+      return this.signIn();
+    } else {
+      ReactDOM.render(renderSplash({ app: this }), this.container);
+      return Promise.resolve(this);
+    }
   }
   signIn() {
     this.api.signIn().then(api => this.list());

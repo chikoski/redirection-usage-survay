@@ -1,6 +1,20 @@
 import Scene from "./scene";
 import ShortUrl from "../models/short-url";
 
+window.hoge = function () {
+  api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
+    .then(file => {
+      const sheet = file.findOrAddSheet();
+      sheet.addRow(["short url", "long url", "clicks"]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      sheet.addRow(["hoge", "fuga", 100]);
+      return file.update();
+    }).then(res => console.log(res));
+}
+
 class DashBoard extends Scene {
   constructor(config) {
     super(config);
@@ -27,11 +41,15 @@ class DashBoard extends Scene {
     }
   }
   export() {
-    console.log("export histories as a spreadsheet");
-    this.api.create().then(file => {
-      console.log(file);
-      console.log(file.spreadsheetUrl);
-    })
+    api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
+      .then(file => {
+        const sheet = file.findOrAddSheet();
+        sheet.addRow(["短縮URL", "リンク先", "表示回数"]);
+        for (const history of this.histories) {
+          sheet.addRow([history.id, history.longUrl, history.visits]);
+        }
+        return file.update();
+      }).then(res => console.log(res));
   }
   render() {
     return this.renderer(this.props({

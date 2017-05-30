@@ -1,4 +1,5 @@
 import { Cachable, CREATED } from "./cachable";
+import Row from "./row";
 
 class Sheet extends Cachable {
   constructor(id, title) {
@@ -23,6 +24,13 @@ class Sheet extends Cachable {
     for (const row of this.rows) {
       row.notModified();
     }
+  }
+  addRow(values = []) {
+    const row = new Row(values);
+    row.created();
+    this.rows.push(row)
+    this.modified();
+    return this;
   }
   static create(id, title) {
     const product = new Sheet(id, title);
