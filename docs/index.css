@@ -25,7 +25,7 @@ html,body{
 }
 
 button{
-  font-size: 14px;
+  font-size: 12px;
   padding: .5rem 2rem;
   display: inline-block;
   background-color: white;
@@ -49,9 +49,46 @@ button:hover{
   font-size: 16px;
   padding: .75rem 4rem;
 }
+header{
+  display: flex;
+  align-items: center;
+}
+header h1{
+  flex-grow: 1;
+}
+header button{
+  margin-right: 1rem;
+}
+.container{
+  display: flex;
+}
+.container .settings{
+  min-width: 16rem;
+  margin-left: 1.5rem;
+  padding: 0 1.5rem;
+  border-left: dotted 1px #ccc;
+  box-shadow: 1px 1px 3px #ccc;
+  animation: show 1s linear 0s;  
+}
+.settings div{
+  margin-bottom: 2rem;
+}
+.settings h3{
+  font-size: 100%;
+  margin-bottom: 0;
+}
+.settings input[type=text]{
+  font-size: 16px;
+  display: block;
+  width: 100%;
+}
+
 .histories{
-  padding: 0;
+  margin-top: 0;
+  padding: 0;  
   list-style: none;
+  flex-grow: 1;
+  box-shadow: 1px 1px 3px #ccc;
 }
 .histories li{
   padding: 1rem 2rem;
@@ -131,4 +168,13 @@ button:hover{
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
   }
+}
+
+@keyframes show{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
 }
