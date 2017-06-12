@@ -1,4 +1,4 @@
-import { React, Dom as dom, Component } from "react";
+import { React, Dom as dom, Component, createFactory } from "react";
 
 class Spinner extends Component {
   render() {
@@ -12,5 +12,7 @@ class Spinner extends Component {
   }
 }
 
+const renderSpinner = createFactory(Spinner);
+
 export { Spinner as default };
-export { Spinner };
+export { Spinner, renderSpinner };
