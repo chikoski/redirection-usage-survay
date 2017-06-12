@@ -1,4 +1,5 @@
 import { Component, DOM as dom } from "react";
+import { renderIcon } from "./icon";
 
 class Splash extends Component {
   render() {
@@ -6,7 +7,9 @@ class Splash extends Component {
       dom.button({
         className: "button",
         onClick: e => this.props.app.signIn()
-      }, "サインイン")
+      },
+        renderIcon({ name: "account_box" }),
+        "サインイン")
     );
   }
 }
