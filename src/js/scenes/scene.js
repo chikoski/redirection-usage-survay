@@ -7,8 +7,11 @@ class Scene {
   start() {
   }
   props(config = {}) {
-    config[app] = config[app] ? config[app] : this.app;
+    config["app"] = config["app"] ? config["app"] : this.app;
     return config;
+  }
+  render() {
+    return this.renderer(this.props());
   }
 }
 

@@ -41,7 +41,7 @@ class DashBoard extends Component {
       this.renderHeader(),
       dom.div({ className: "container" },
         renderHistories({ histories: this.props.histories }),
-        this.state.showSettings ? renderSettings({ scene: this.props.scene, app: this.props.app }) : null,
+        this.state.showSettings ? renderSettings({ scene: this.props.scene }) : null,
       ),
     )
   }
