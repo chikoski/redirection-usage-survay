@@ -1,10 +1,9 @@
 import { Component, DOM as dom, createFactory } from "react";
 import { History } from "./history";
-import { Settings } from "./settings";
+import { renderModalSettings } from "./modal-settings";
 import { renderDialog } from "./dialog";
 
 const renderHistories = createFactory(History);
-const renderSettings = createFactory(Settings);
 
 class DashBoard extends Component {
   constructor(props) {
@@ -23,10 +22,7 @@ class DashBoard extends Component {
         onClick: e => this.props.scene.signout(),
       }, "サインアウト"),
       dom.button({
-        onClick: e => {
-          const nextState = !this.state.showSettings;
-          this.setState({ showSettings: nextState })
-        }
+        onClick: e => this.setState({ showSettings: true })
       }, "設定")
     )
   }
@@ -47,7 +43,7 @@ class DashBoard extends Component {
           onClick: e => this.props.scene.export()
         }, "スプレッドシートへ出力"),
         renderHistories({ histories: this.props.histories }),
-        this.state.showSettings ? renderSettings({ scene: this.props.scene }) : null,
+        renderModalSettings({ hidden: !this.state.showSettings, scene: this.props.scene })
       ),
     )
   }
