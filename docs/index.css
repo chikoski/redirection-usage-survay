@@ -178,6 +178,14 @@ button:hover{
   margin-bottom: 2.5rem;
   align-items: center;
 }
+.settings div:last-child{
+  margin: 0;
+  text-align: center;
+  display: block;
+}
+.settings div:last-child button{
+  margin: 0 .5rem;
+}
 .settings h2{
   font-size: .8rem;
   margin-bottom: 0;
