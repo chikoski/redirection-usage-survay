@@ -43,7 +43,11 @@ class DashBoard extends Component {
           onClick: e => this.props.scene.export()
         }, "スプレッドシートへ出力"),
         renderHistories({ histories: this.props.histories }),
-        renderModalSettings({ hidden: !this.state.showSettings, scene: this.props.scene })
+        renderModalSettings({
+          hidden: !this.state.showSettings,
+          scene: this.props.scene,
+          spreadsheetUrl: this.props.app.spreadsheetUrl,
+        })
       ),
     )
   }

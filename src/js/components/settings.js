@@ -3,7 +3,7 @@ import { DOM as dom, Component, createFactory } from "react";
 class Settings extends Component {
   constructor(props) {
     super(props);
-    this.status = {
+    this.state = {
       spreadsheetUrl: props.spreadsheetUrl
     };
   }
@@ -12,7 +12,7 @@ class Settings extends Component {
       dom.button({
         className: "primary",
         onClick: e => {
-          this.props.scene.app.setConfig({ spreadsheet: this.status.spreadsheetUrl });
+          this.props.scene.app.spreadsheetUrl = this.state.spreadsheetUrl;
           if (typeof this.props.onSubmit === "function") {
             this.props.onSubmit(e);
           }
@@ -30,8 +30,8 @@ class Settings extends Component {
         dom.input({
           type: "text",
           placeholder: "Google スプレッドシートのURL",
-          value: this.status.spreadsheetUrl,
-          onChange: e => this.setStatus({ spreadsheetUrl: e.target.value }),
+          value: this.state.spreadsheetUrl,
+          onChange: e => this.setState({ spreadsheetUrl: e.target.value }),
         })),
       this.renderContorls()
     );
