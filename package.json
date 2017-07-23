@@ -15,6 +15,14 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "serve": "http-server -p 8080 -c-1 docs"
+    "start": "http-server -p 8080 -c-1 docs",
+    "design": "http-server -p 3700 -c-1 design",
+    "migrate": "node scripts/migrate.js",
+    "list": "node scripts/list.js"
+  },
+  "dependencies": {
+    "googleapis": "^19.0.0",
+    "node-fetch": "^1.7.1",
+    "tsv": "^0.2.0"
   }
 }

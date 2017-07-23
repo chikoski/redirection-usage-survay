@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>DB利用履歴確認ツール</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="dialog" id="api-load-error">
+      <h2>Googleからファイルを読み込めませんでした</h2>
+      <p>プログラムの実行に必要なファイルをGoogleから読み込めませんでした。</p>
+      <h3>対処</h3>
+      <p>しばらく時間をおいてから、再度アクセスしてください。Googleの一時的な問題かもしれません。</p>
+      <p>それでもダメなら、管理者へご連絡ください。</p>
+    </div>
+    <div class="dialog" id="data-load-error">
+    </div>
+    <div class="scene" id="start">
+      <div class="loading"></div>
+      <div class="log"></div>
+    </div>
+    <div class="scene" id="signin">
+    </div>
+    <div class="scene" id="dashboard">
+    </div>
+  </div>
+</body>
+
+</html>
