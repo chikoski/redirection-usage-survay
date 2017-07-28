@@ -1,7 +1,6 @@
 import Bootloader from "./bootloader";
 
 const selector = "#app";
-const configFile = "config.json";
-const localSettings = ["spreadsheetUrl"];
+const attributes = ["spreadsheetUrl"];
 
-Bootloader.boot(configFile, selector, localSettings);
+Bootloader.boot({ selector: selector, attributes: attributes });
