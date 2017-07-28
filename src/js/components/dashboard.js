@@ -42,6 +42,10 @@ class DashBoard extends Component {
           disabled: !this.props.exportable,
           onClick: e => this.props.scene.export()
         }, "スプレッドシートへ出力"),
+        dom.button({
+          disabled: !this.props.exportable,
+          onClick: e => this.props.scene.exportCSV()
+        }, "CSVに出力"),
         renderHistories({ histories: this.props.histories }),
         renderModalSettings({
           hidden: !this.state.showSettings,

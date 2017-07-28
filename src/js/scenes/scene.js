@@ -3,6 +3,7 @@ class Scene {
     this.api = api;
     this.app = app;
     this.renderer = renderer;
+    this.errorMessage = null;
   }
   start() {
   }
@@ -11,7 +12,11 @@ class Scene {
     return config;
   }
   render() {
-    return this.renderer(this.props());
+    const el = this.renderer(this.props());
+    return el;
+  }
+  error() {
+    // XXX
   }
 }
 

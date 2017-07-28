@@ -31,15 +31,33 @@ class DashBoard extends Scene {
     });
   }
   export() {
-    api.open("1sOJXByHWr7pczFwPqYEtLlaTN8tgGdHp9ncDiVnf9WY")
+    api.open(this.app.spreadsheetId)
       .then(file => {
         const sheet = file.findOrAddSheet();
         sheet.addRow(["短縮URL", "リンク先", "表示回数"]);
         for (const history of this.histories) {
           sheet.addRow([history.id, history.longUrl, history.visits]);
         }
+        this.app.spreadsheetUrl = file.original.spreadsheetUrl;
+        console.log(file);
         return file.update();
       }).then(res => console.log(res));
+  }
+  exportCSV() {
+    let csv = ["URL", "Destination", "Visitors"].join(",") + "\n";
+    csv += this.histories
+      .map(history => [`"${history.id}"`, `"${history.longUrl}"`, `"${history.visits}"`].join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "application/csv" });
+    const link = document.createElement("a");
+    const now = new Date();
+    link.href = URL.createObjectURL(blob);
+    link.target = "_blank";
+    link.download = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   }
   signout() {
     this.app.signout();
