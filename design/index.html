@@ -4,28 +4,117 @@
 <head>
   <title>DB利用履歴確認ツール</title>
   <meta charset="utf-8">
+  <meta name="google-signin-client_id" content="736857769253-ctl4n7t7h7620hdn3fqgb5nsqogsc28l.apps.googleusercontent.com">
   <link rel="stylesheet" href="index.css">
   <script src="index.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 
 <body>
   <div id="app">
+    <header>
+      <div class="container">
+        <h1>DB利用履歴確認ツール</h1>
+      </div>
+    </header>
+    <div class="scene" id="start">
+      <div class="loading">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+      </div>
+      <div class="log">
+        起動に必要なファイルをロードしています。
+      </div>
+    </div>
+    <div class="scene container" id="signin">
+      <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    </div>
+    <div class="scene container" id="dashboard">
+      <div class="controls">
+        <button data-export="csv">CSVへ出力する</button>
+        <button data-export="spreadsheet">Google Spreadsheetへ出力する</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>短縮URL</th>
+            <th>アクセス回数</th>
+            <th>詳細</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+          <tr>
+            <td><a href="http://www.courts.go.jp/">www.courts.go.jp</a></td>
+            <td><a href="https://goo.gl/hvLXFX">goo.gl/hvLXFX</a></td>
+            <td>9</td>
+            <td><a href="https://goo.gl/hvLXFX">こちら</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="dialog" id="api-load-error">
-      <h2>Googleからファイルを読み込めませんでした</h2>
-      <p>プログラムの実行に必要なファイルをGoogleから読み込めませんでした。</p>
-      <h3>対処</h3>
-      <p>しばらく時間をおいてから、再度アクセスしてください。Googleの一時的な問題かもしれません。</p>
-      <p>それでもダメなら、管理者へご連絡ください。</p>
+      <div class="container relative">
+        <div class="message">
+          <h2>Googleからファイルを読み込めませんでした</h2>
+          <p>プログラムの実行に必要なファイルをGoogleから読み込めませんでした。</p>
+          <h3>対処</h3>
+          <p>しばらく時間をおいてから、再度アクセスしてください。Googleの一時的な問題かもしれません。</p>
+          <p>それでもダメなら、管理者へご連絡ください。</p>
+        </div>
+        <button>&times;</button>
+      </div>
     </div>
     <div class="dialog" id="data-load-error">
-    </div>
-    <div class="scene" id="start">
-      <div class="loading"></div>
-      <div class="log"></div>
-    </div>
-    <div class="scene" id="signin">
-    </div>
-    <div class="scene" id="dashboard">
+      <div class="container relative">
+        <div class="message">
+          <h2>データを読み込めませんでした</h2>
+          <p>Googleからデータベースの一覧と、そのアクセス履歴をダウンロードできませんでした。</p>
+          <h3>対処</h3>
+          <p>しばらく時間をおいてから、再度アクセスしてください。Googleの一時的な問題かもしれません。</p>
+          <p>それでもダメなら、管理者へご連絡ください。</p>
+        </div>
+        <button>&times;</button>
+      </div>
     </div>
   </div>
 </body>

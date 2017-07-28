@@ -1,6 +1,156 @@
-body{
-  font-size: 18px;
+:root{
+  --primary-color: #0277bd;
+  --primary-color-light: #58a5f0;
+  --primary-color-dark: #004c8c;
+  --primary-text-color: #fff;
+  --secondary-color: #c62828;
+  --secondary-color-light: #ff5f52;
+  --secondary-color-dark: #8e0000;
+  --text-color: #333;
+  --text-color-light: #444;
+  --background-color: #fff;
+  --shadow-color: #ccc;
+  --shadow-color-dark: #999;
+  --shadow-color-active: #333;
 }
+
+body{
+  padding: 0;
+  margin: 0;
+}
+.container{
+  max-width: 55rem;
+  display: block;
+  margin: auto;
+}
+header{
+  color: white;
+  background-color: var(--primary-color-dark);
+  box-shadow: 2px 2px 2px var(--shadow-color);
+  padding: .5rem 0;
+  margin-bottom: 4rem;
+}
+h1{
+  font-size: 1rem;
+  margin: 0;
+}
+a{
+  color: var(--primary-color-dark);
+}
+button{
+  color: white;
+  background-color: #666;
+  border: solid 1px #f0f0f0;
+  padding: .5rem 1rem;
+  box-shadow: 2px 2px 4px #ccc;
+}
+button:hover{
+  background-color: var(--primary-color);
+  box-shadow: 1px 1px 2px #ccc; 
+}
+button:active{
+  box-shadow: inset 2px 2px 4px #333;
+}
+table{
+  width: 100%;
+  font-size: 1rem;
+}
+tr:nth-child(even){
+  background-color: #f0f0f0;
+}
+th{
+  font-weight: normal;
+  color: white;
+  background-color: var(--primary-color);
+}
+th,td{
+  padding: .5rem 1rem;
+}
+.loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;     
+}
+.loading > div {
+  background-color: var(--primary-color);
+  height: 5rem;
+  width: 1rem;
+  margin: .1rem;
+  display: inline-block;
+  -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+  animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+.loading .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+.loading .rect3 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+.loading .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+.loading .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+.dialog{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -10rem 0 0 -27rem;
+  background-color: white;
+  box-shadow: 2px 2px 4px #ccc;
+}
+.dialog h2{
+  margin: 0;
+}
+.dialog .message{
+  padding: 2rem;
+}
+.dialog button{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  padding: 0;
+  border-radius: 2rem;
+  margin-top: -1rem;
+  margin-right: -1rem;
+}
+
+@keyframes sk-stretchdelay {
+  0%, 40%, 100% { 
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }  20% { 
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}
+
+.log{
+  color: #666;
+  font-size: .8rem;
+  text-align: center;
+}
+
+.controls{
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.relative{
+  position: relative;
+}
+
 .hidden{
   display: none;
 }
