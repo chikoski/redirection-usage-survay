@@ -59,6 +59,7 @@ const App = (() => {
     constructor({ el, eventQueue }) {
       super({ el, eventQueue, eventName: "error-raised" });
       eventQueue.subscribe("start", data => this.hide());
+      el.querySelector("button").addEventListener("click", e => this.hide());
     }
   }
 
@@ -72,10 +73,25 @@ const App = (() => {
   class App {
     constructor({ el }) {
       this.el = el;
-      this.queue = new EventQueue(["scene-changed", "error-raised", "start"]);
+      this.queue = new EventQueue(["scene-changed", "error", "start"]);
       const createMap = createComponentMap(this.el, this.queue);
       this.scenes = createMap(".scene", Scene);
       this.dialogs = createMap(".dialog", Dialog);
+
+      this.queue.subscribe("error", error => {
+        let dialog = null;
+        switch (error.type) {
+          case "api-error":
+            dialog = this.dialogs.get("api-load-error");
+            break;
+          case "load-error":
+            dialog = this.dialogs.get("data-load-error");
+          default:
+        }
+        if (dialog) {
+          dialog.show();
+        }
+      });
     }
     transite(newScene) {
       return promise(() => {
@@ -86,6 +102,15 @@ const App = (() => {
         }
         return Promise.reject(`No corresponding scene is available for ${newScene}`);
       });
+    }
+    send(error) {
+      switch (error) {
+        case "api-error":
+        case "load-error":
+          this.queue.publish("error", { type: error });
+          break;
+        default:
+      }
     }
     start() {
       this.transite("start").then(result => console.log("Transite to start scene"));
@@ -98,4 +123,12 @@ const App = (() => {
 window.addEventListener("DOMContentLoaded", e => {
   window.app = new App({ el: document.querySelector("#app") });
   window.app.start();
+  window.controls = {
+    start: () => app.transite("start"),
+    signin: () => app.transite("signin"),
+    dashboard: () => app.transite("dashboard"),
+    apiError: () => app.send("api-error"),
+    loadError: () => app.send("load-error")
+  };
+  window.onSignIn = event => console.log(event);
 });
