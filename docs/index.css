@@ -13,198 +13,67 @@
   --shadow-color-dark: #999;
   --shadow-color-active: #333;
 }
-html,body{
-  margin: 0;
+
+body{
   padding: 0;
-  font-size: 16px;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  height: 100%;
+  margin: 0;
+}
+.container{
+  max-width: 55rem;
+  display: block;
+  margin: auto;
 }
 header{
-  display: flex;
-  align-items: center;
-  margin-top: 4rem;
-  margin-bottom: 6rem;
-  background-color: var(--background-color);
-  height: 4rem;
+  color: white;
+  background-color: var(--primary-color-dark);
+  box-shadow: 2px 2px 2px var(--shadow-color);
+  padding: .5rem 0;
+  margin-bottom: 4rem;
 }
 h1{
-  color: var(--text-color-light);
+  font-size: 1rem;
   margin: 0;
-  box-sizing: border-box;
-  flex-grow: 1;
-  font-weight: normal;
-  font-size: 2rem;
 }
 a{
   color: var(--primary-color-dark);
 }
 button{
-  border: solid 1px var(--shadow-color);
-  padding: .5rem 2rem;
-  box-shadow: 2px 4px 8px var(--shadow-color);
-  font-size: .81rem;
-  cursor: pointer;
-}
-button:active{
-  box-shadow: inset 1px 2px 4px var(--shadow-color-active);
+  color: white;
+  background-color: #666;
+  border: solid 1px #f0f0f0;
+  padding: .5rem 1rem;
+  box-shadow: 2px 2px 4px #ccc;
 }
 button:hover{
-  box-shadow: 1px 2px 4px var(--shadow-color-dark);
+  background-color: var(--primary-color);
+  box-shadow: 1px 1px 2px #ccc; 
 }
-
-.controls{
-  height: 100%;
-  margin: 0;
+button:active{
+  box-shadow: inset 2px 2px 4px #333;
 }
-.controls button{
-  display: inline-block;
-  height: 100%;
-  border: none;
-  background-color: var(--background-color);
-  border-right: solid 1px var(--shadow-color);
-  margin: 0;
-  padding: .5rem 1rem;
-  font-size: .8rem;
-  box-shadow: none;
+table{
+  width: 100%;
+  font-size: 1rem;
 }
-.controls button:hover{
-  text-decoration: underline;
-}
-.controls button:active{
-  color: var(--primary-color-light);
-}
-.controls button:last-child{
-  border-right: none;
-}
-
-.histories{
-  list-style: none;
-  padding: 0;
-  display: table;
-}
-.histories li{
-  display: table-row;
-  line-height: 1.5;
-}
-.histories li:nth-child(odd){
+tr:nth-child(even){
   background-color: #f0f0f0;
 }
-.histories span{
-  display: table-cell;
-  vertical-align: middle;
-  padding: .5rem 1rem;  
-}
-.histories li.header{
-  background-color: #ccc;
-}
-.histories .header span{  
-  text-align: center;
-  white-space: nowrap;
-  word-break: keep-all;
-}
-.histories .id{
-  word-break: keep-all;
-}
-.histories .stats{
-  text-align: right;
-}
-
-.dialog{
-  display: flex;
-  align-items: center;  
-  box-sizing: border-box;
-  box-shadow: 2px 4px 8px var(--shadow-color);
-}
-.dialog .message{
-  padding: 0 1rem;
-  display: block;
-  flex-grow: 1;
-}
-.dialog button{
-  display: block;
-  border: none;
+th{
+  font-weight: normal;
+  color: white;
   background-color: var(--primary-color);
-  color: var(--background-color);
-  height: 100%;  
-  padding: 1rem;
-  box-sizing: border-box;
 }
-
-.modal{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  background-color: rgba(0, 0, 0, .8);
+th,td{
+  padding: .5rem 1rem;
 }
-.modal .window{
-  background-color:  var(--background-color);
-  padding: 2.5rem;
-  position: relative;
-}
-.modal .window h2{
-  margin-top: 0;
-}
-.modal .window > button{
-  display: inline-block;
-  padding: 0;
-  position: absolute;
-  top: -0.75rem;
-  right: -0.75rem;
-  border: solid 2px var(--shadow-color);
-  border-radius: 0.75rem;
-  background-color: var(--background-color);
-  width: 1.5rem;
-  height: 1.5rem;
-  box-sizing: border-box;
-  box-shadow: 1px 1px 3px var(--shadow-color);
-  font-size: .8rem;
-  text-align: center;
-}
-
-.settings{
-  width: 30rem; 
-}
-.settings div{
-  display: flex;
-  margin-bottom: 2.5rem;
-  align-items: center;
-}
-.settings div:last-child{
-  margin: 0;
-  text-align: center;
-  display: block;
-}
-.settings div:last-child button{
-  margin: 0 .5rem;
-}
-.settings h2{
-  font-size: .8rem;
-  margin-bottom: 0;
-  word-break: keep-all;
-  margin-right: 1rem;
-}
-.settings input[type=text]{
-  width: 100%;
-  display: block;
-}
-
-.spinner {
+.loading {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;     
 }
-.spinner > div {
+.loading > div {
   background-color: var(--primary-color);
   height: 5rem;
   width: 1rem;
@@ -213,43 +82,48 @@ button:hover{
   -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
   animation: sk-stretchdelay 1.2s infinite ease-in-out;
 }
-.spinner .rect2 {
+.loading .rect2 {
   -webkit-animation-delay: -1.1s;
   animation-delay: -1.1s;
 }
-.spinner .rect3 {
+.loading .rect3 {
   -webkit-animation-delay: -1.0s;
   animation-delay: -1.0s;
 }
-.spinner .rect4 {
+.loading .rect4 {
   -webkit-animation-delay: -0.9s;
   animation-delay: -0.9s;
 }
 
-.spinner .rect5 {
+.loading .rect5 {
   -webkit-animation-delay: -0.8s;
   animation-delay: -0.8s;
 }
-
-/* predicates */
-.primary{
-  color: var(--background-color);
-  background-color: var(--primary-color);
+.dialog{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -10rem 0 0 -27rem;
+  background-color: white;
+  box-shadow: 2px 2px 4px #ccc;
 }
-.hidden{
-  display: none;
+.dialog h2{
+  margin: 0;
 }
-
-#app{
-  height: 100%;
-  padding: 0 2rem;
-  box-sizing: border-box;
+.dialog .message{
+  padding: 2rem;
 }
-
-
-@-webkit-keyframes sk-stretchdelay {
-  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
-  20% { -webkit-transform: scaleY(1.0) }
+.dialog button{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  padding: 0;
+  border-radius: 2rem;
+  margin-top: -1rem;
+  margin-right: -1rem;
 }
 
 @keyframes sk-stretchdelay {
@@ -262,11 +136,21 @@ button:hover{
   }
 }
 
-@keyframes show{
-    from{
-        opacity: 0;
-    }
-    to{
-        opacity: 1;
-    }
+.log{
+  color: #666;
+  font-size: .8rem;
+  text-align: center;
+}
+
+.controls{
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.relative{
+  position: relative;
+}
+
+.hidden{
+  display: none;
 }
