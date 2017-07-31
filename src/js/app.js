@@ -1,5 +1,6 @@
 import EventQueue from "./event-queue";
-import { Scene, Dialog } from "./component";
+import { Scene as SceneView, Dialog } from "./component";
+import { Start, DashBoard, Signin } from "./scenes";
 
 const toA = list => Array.prototype.concat.apply([], list);
 
@@ -12,15 +13,31 @@ const createComponentMap = (base, queue) =>
     return map;
   }, new Map());
 
+const associate = (table, eventQueue) => Object.keys(table).reduce((map, selector) => {
+  const klass = table[selector];
+  const conf = { el: document.querySelector(`#${selector}`), eventQueue: eventQueue };
+  const obj = new klass(conf);
+  map.set(selector, obj);
+  return map;
+}, new Map());
+
 class App {
   constructor({ el, settings = {} }) {
     this.el = el;
     this.settings = settings;
-    this.queue = new EventQueue(["scene-change", "show-dialog", "start"]);
+    this.googleUser = null;
+
+    this.queue = new EventQueue([
+      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready"
+    ]);
 
     const createMap = createComponentMap(this.el, this.queue);
-    this.scenes = createMap(".scene", Scene);
     this.dialogs = createMap(".dialog", Dialog);
+    this.scenes = associate({
+      "start": Start,
+      "signin": Signin,
+      "dashboard": DashBoard
+    }, this.queue);
 
     this.queue.subscribe("show-dialog", error => {
       let dialog = null;
@@ -36,16 +53,32 @@ class App {
         dialog.show();
       }
     });
+
+    this.queue.subscribe("ready", data => {
+      console.log("ready");
+      return this.transite("signin")
+        .then(app => console.log("signin"))
+        .catch(error => console.error(error));
+    });
+
+    window.onSignIn = googleUser => this.signin(googleUser);
   }
   start() {
     this.transite("start").then(result => console.log("Transite to start scene"));
     this.queue.publish("start", {});
   }
+  signin(googleUser) {
+    this.googleUser = googleUser;
+    this.transite("dashboard");
+  }
   transite(newScene) {
+    console.log(`transite to ${newScene}`);
     return promise(() => {
       if (this.scenes.has(newScene)) {
+        console.log(`A scene object associated with ${newScene} is found`);
         this.scene = this.scenes.get(newScene);
-        this.queue.publish("scene-change", this.scene);
+        console.log(this.scene);
+        this.queue.publish("scene-transition", this.scene);
         return Promise.resolve(this);
       }
       return Promise.reject(`No corresponding scene is available for ${newScene}`);
@@ -55,4 +88,3 @@ class App {
 
 export { App as default };
 export { App };
-

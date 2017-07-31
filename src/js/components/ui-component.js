@@ -2,21 +2,30 @@ class UIComponent {
   constructor({ el, eventQueue, eventName }) {
     this.el = el;
     this.id = el.id;
-
-    eventQueue.subscribe(eventName, data => {
-      if (data.id === this.id) {
-        return this.show();
-      } else {
-        return this.hide();
-      }
-    });
+    this.hidden = false;
+    this.eventQueue = eventQueue;
+    if (eventName != null) {
+      eventQueue.subscribe(eventName, data => {
+        if (data.id === this.id) {
+          return this.show();
+        } else {
+          return this.hide();
+        }
+      });
+    }
   }
   hide() {
-    this.el.classList.add("hidden");
+    if (!this.hidden) {
+      this.el.classList.add("hidden");
+      this.hidden = true;
+    }
     return this;
   }
   show() {
-    this.el.classList.remove("hidden");
+    if (this.hidden) {
+      this.el.classList.remove("hidden");
+      this.hidden = false;
+    }
     return this;
   }
 }

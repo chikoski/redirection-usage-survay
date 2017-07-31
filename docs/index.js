@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,10 +71,83 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(1);
+
+
+class Scene extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default */] {
+  constructor({ el, eventQueue }) {
+    super({ el, eventQueue, eventName: "show-scene" });
+  }
+  hide() {
+    if (!this.hidden) {
+      this.eventQueue.publish("before-hide", this);
+    }
+    super.hide();
+  }
+  show() {
+    if (this.hidden) {
+      this.eventQueue.publish("before-show", this);
+    }
+    super.show();
+  }
+}
+
+
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UIComponent; });
+/* unused harmony export UIComponent */
+class UIComponent {
+  constructor({ el, eventQueue, eventName }) {
+    this.el = el;
+    this.id = el.id;
+    this.hidden = false;
+    this.eventQueue = eventQueue;
+    if (eventName != null) {
+      eventQueue.subscribe(eventName, data => {
+        if (data.id === this.id) {
+          return this.show();
+        } else {
+          return this.hide();
+        }
+      });
+    }
+  }
+  hide() {
+    if (!this.hidden) {
+      this.el.classList.add("hidden");
+      this.hidden = true;
+    }
+    return this;
+  }
+  show() {
+    if (this.hidden) {
+      this.el.classList.remove("hidden");
+      this.hidden = false;
+    }
+    return this;
+  }
+}
+
+
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Bootloader; });
 /* unused harmony export Bootloader */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_localforage__);
 
 
@@ -119,7 +192,7 @@ const Bootloader = {
 
 
 /***/ }),
-/* 1 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var require;var require;/*!
@@ -2435,10 +2508,10 @@ module.exports = localforage_js;
 
 },{"3":3}]},{},[4])(4)
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ (function(module, exports) {
 
 var g;
@@ -2465,14 +2538,16 @@ module.exports = g;
 
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return App; });
 /* unused harmony export App */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__event_queue__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__event_queue__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scenes__ = __webpack_require__(11);
+
 
 
 
@@ -2487,15 +2562,31 @@ const createComponentMap = (base, queue) =>
     return map;
   }, new Map());
 
+const associate = (table, eventQueue) => Object.keys(table).reduce((map, selector) => {
+  const klass = table[selector];
+  const conf = { el: document.querySelector(`#${selector}`), eventQueue: eventQueue };
+  const obj = new klass(conf);
+  map.set(selector, obj);
+  return map;
+}, new Map());
+
 class App {
   constructor({ el, settings = {} }) {
     this.el = el;
     this.settings = settings;
-    this.queue = new __WEBPACK_IMPORTED_MODULE_0__event_queue__["a" /* default */](["scene-change", "show-dialog", "start"]);
+    this.googleUser = null;
+
+    this.queue = new __WEBPACK_IMPORTED_MODULE_0__event_queue__["a" /* default */]([
+      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready"
+    ]);
 
     const createMap = createComponentMap(this.el, this.queue);
-    this.scenes = createMap(".scene", __WEBPACK_IMPORTED_MODULE_1__component__["a" /* Scene */]);
-    this.dialogs = createMap(".dialog", __WEBPACK_IMPORTED_MODULE_1__component__["b" /* Dialog */]);
+    this.dialogs = createMap(".dialog", __WEBPACK_IMPORTED_MODULE_1__component__["a" /* Dialog */]);
+    this.scenes = associate({
+      "start": __WEBPACK_IMPORTED_MODULE_2__scenes__["a" /* Start */],
+      "signin": __WEBPACK_IMPORTED_MODULE_2__scenes__["b" /* Signin */],
+      "dashboard": __WEBPACK_IMPORTED_MODULE_2__scenes__["c" /* DashBoard */]
+    }, this.queue);
 
     this.queue.subscribe("show-dialog", error => {
       let dialog = null;
@@ -2511,16 +2602,32 @@ class App {
         dialog.show();
       }
     });
+
+    this.queue.subscribe("ready", data => {
+      console.log("ready");
+      return this.transite("signin")
+        .then(app => console.log("signin"))
+        .catch(error => console.error(error));
+    });
+
+    window.onSignIn = googleUser => this.signin(googleUser);
   }
   start() {
     this.transite("start").then(result => console.log("Transite to start scene"));
     this.queue.publish("start", {});
   }
+  signin(googleUser) {
+    this.googleUser = googleUser;
+    this.transite("dashboard");
+  }
   transite(newScene) {
+    console.log(`transite to ${newScene}`);
     return promise(() => {
       if (this.scenes.has(newScene)) {
+        console.log(`A scene object associated with ${newScene} is found`);
         this.scene = this.scenes.get(newScene);
-        this.queue.publish("scene-change", this.scene);
+        console.log(this.scene);
+        this.queue.publish("scene-transition", this.scene);
         return Promise.resolve(this);
       }
       return Promise.reject(`No corresponding scene is available for ${newScene}`);
@@ -2531,30 +2638,28 @@ class App {
 
 
 
-
-
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_dialog__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_scene__ = __webpack_require__(9);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__components_dialog__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__components_scene__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_dialog__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_scene__ = __webpack_require__(0);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__components_dialog__["a"]; });
+/* unused harmony reexport Scene */
 
 
 
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dialog; });
 /* unused harmony export Dialog */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(1);
 
 
 class Dialog extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default */] {
@@ -2569,40 +2674,17 @@ class Dialog extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default 
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UIComponent; });
-/* unused harmony export UIComponent */
-class UIComponent {
-  constructor({ el, eventQueue, eventName }) {
-    this.el = el;
-    this.id = el.id;
-
-    eventQueue.subscribe(eventName, data => {
-      if (data.id === this.id) {
-        return this.show();
-      } else {
-        return this.hide();
-      }
-    });
-  }
-  hide() {
-    this.el.classList.add("hidden");
-    return this;
-  }
-  show() {
-    this.el.classList.remove("hidden");
-    return this;
-  }
-}
-
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return API; });
+const API = "https://apis.google.com/js/api.js";
 
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2635,12 +2717,12 @@ class EventQueue {
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bootloader__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bootloader__ = __webpack_require__(2);
 
 
 const selector = "#app";
@@ -2649,19 +2731,66 @@ const attributes = ["spreadsheetUrl"];
 __WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot({ selector: selector, attributes: attributes });
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
+/* unused harmony export default */
 /* unused harmony export Scene */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(6);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Start; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Signin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DashBoard; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_scene__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(8);
 
 
-class Scene extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default */] {
+
+class Scene {
   constructor({ el, eventQueue }) {
-    super({ el, eventQueue, eventName: "scene-change" });
+    this.view = new __WEBPACK_IMPORTED_MODULE_0__components_scene__["a" /* Scene */]({ el: el, eventQueue: eventQueue });
+    this.view.hide();
+    this.eventQueue = eventQueue;
+    this.eventQueue.subscribe("scene-transition", nextScene => {
+      if (nextScene == this) {
+        this.view.show();
+      } else {
+        this.view.hide();
+      }
+    });
   }
+}
+
+const loadScript = url => new Promise((resolve, reject) => {
+  const el = document.createElement("script");
+  el.src = url;
+  el.addEventListener("load", e => {
+    return resolve();
+  }, { once: true });
+  el.addEventListener("error", e => {
+    return reject(e);
+  }, { once: true });
+  document.body.appendChild(el);
+});
+
+class Start extends Scene {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("start", data => {
+      this.view.show();
+      this.loadAPI();
+    });
+  }
+  loadAPI() {
+    return loadScript(__WEBPACK_IMPORTED_MODULE_1__constants__["a" /* API */])
+      .then(() => this.eventQueue.publish("ready"))
+      .catch(error => this.eventQueue.publish("api-load-error", error))
+  }
+}
+
+class Signin extends Scene {
+}
+
+class DashBoard extends Scene {
 }
 
 
