@@ -2547,6 +2547,8 @@ module.exports = g;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__event_queue__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scenes__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(8);
+
 
 
 
@@ -2618,7 +2620,15 @@ class App {
   }
   signin(googleUser) {
     this.googleUser = googleUser;
-    this.transite("dashboard");
+    const options = new gapi.auth2.SigninOptionsBuilder({
+      scope: __WEBPACK_IMPORTED_MODULE_3__constants__["a" /* SCOPES */].join(" ")
+    });
+    return this.googleUser.grant(options)
+      .then(success => {
+        this.transite("dashboard");
+      }, fail => {
+        console.error(fail);
+      }); // XXX
   }
   transite(newScene) {
     console.log(`transite to ${newScene}`);
@@ -2678,8 +2688,22 @@ class Dialog extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default 
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return API; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return API; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SCOPES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DISCOVER_DOCS; });
 const API = "https://apis.google.com/js/api.js";
+
+const SCOPES = [
+  "https://www.googleapis.com/auth/urlshortener",
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/drive.file"
+];
+
+const DISCOVER_DOCS = [
+  "https://www.googleapis.com/discovery/v1/apis/urlshortener/v1/rest",
+  "https://sheets.googleapis.com/$discovery/rest?version=v4"
+];
 
 
 
@@ -2772,6 +2796,24 @@ const loadScript = url => new Promise((resolve, reject) => {
   document.body.appendChild(el);
 });
 
+const initGAPIClient = () => {
+  return new Promise((resolve, reject) => {
+    gapi.load("client", {
+      callback: () => resolve(),
+      onerror: () => reject("load error"),
+      timeout: 5000,
+      ontimeout: () => reject("timeout")
+    });
+  });
+}
+
+const discover = doc => {
+  console.log(doc);
+  return new Promise((resolve, reject) => {
+    gapi.client.load(doc).then(success => resolve(success), fail => reject(fail));
+  });
+}
+
 class Start extends Scene {
   constructor(conf) {
     super(conf);
@@ -2781,7 +2823,12 @@ class Start extends Scene {
     });
   }
   loadAPI() {
-    return loadScript(__WEBPACK_IMPORTED_MODULE_1__constants__["a" /* API */])
+    return loadScript(__WEBPACK_IMPORTED_MODULE_1__constants__["b" /* API */])
+      .then(initGAPIClient)
+      .then(() => {
+        console.log("discover");
+        Promise.all(__WEBPACK_IMPORTED_MODULE_1__constants__["c" /* DISCOVER_DOCS */].map(doc => discover(doc)))
+      })
       .then(() => this.eventQueue.publish("ready"))
       .catch(error => this.eventQueue.publish("api-load-error", error))
   }

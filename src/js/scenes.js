@@ -1,5 +1,5 @@
 import { Scene as View } from "./components/scene";
-import { API } from "./constants";
+import { API, DISCOVER_DOCS } from "./constants";
 
 class Scene {
   constructor({ el, eventQueue }) {
@@ -28,6 +28,24 @@ const loadScript = url => new Promise((resolve, reject) => {
   document.body.appendChild(el);
 });
 
+const initGAPIClient = () => {
+  return new Promise((resolve, reject) => {
+    gapi.load("client", {
+      callback: () => resolve(),
+      onerror: () => reject("load error"),
+      timeout: 5000,
+      ontimeout: () => reject("timeout")
+    });
+  });
+}
+
+const discover = doc => {
+  console.log(doc);
+  return new Promise((resolve, reject) => {
+    gapi.client.load(doc).then(success => resolve(success), fail => reject(fail));
+  });
+}
+
 class Start extends Scene {
   constructor(conf) {
     super(conf);
@@ -38,6 +56,11 @@ class Start extends Scene {
   }
   loadAPI() {
     return loadScript(API)
+      .then(initGAPIClient)
+      .then(() => {
+        console.log("discover");
+        Promise.all(DISCOVER_DOCS.map(doc => discover(doc)))
+      })
       .then(() => this.eventQueue.publish("ready"))
       .catch(error => this.eventQueue.publish("api-load-error", error))
   }

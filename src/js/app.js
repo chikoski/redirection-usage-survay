@@ -1,6 +1,7 @@
 import EventQueue from "./event-queue";
 import { Scene as SceneView, Dialog } from "./component";
 import { Start, DashBoard, Signin } from "./scenes";
+import { SCOPES } from "./constants";
 
 const toA = list => Array.prototype.concat.apply([], list);
 
@@ -69,7 +70,15 @@ class App {
   }
   signin(googleUser) {
     this.googleUser = googleUser;
-    this.transite("dashboard");
+    const options = new gapi.auth2.SigninOptionsBuilder({
+      scope: SCOPES.join(" ")
+    });
+    return this.googleUser.grant(options)
+      .then(success => {
+        this.transite("dashboard");
+      }, fail => {
+        console.error(fail);
+      }); // XXX
   }
   transite(newScene) {
     console.log(`transite to ${newScene}`);
