@@ -2579,7 +2579,7 @@ class App {
     this.googleUser = null;
 
     this.queue = new __WEBPACK_IMPORTED_MODULE_0__event_queue__["a" /* default */]([
-      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready"
+      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready", "signin"
     ]);
 
     const createMap = createComponentMap(this.el, this.queue);
@@ -2625,9 +2625,9 @@ class App {
     });
     return this.googleUser.grant(options)
       .then(success => {
-        this.transite("dashboard");
+        this.queue.publish("signin");
       }, fail => {
-        console.error(fail);
+        this.queue.publish("api-load-error", fail);
       }); // XXX
   }
   transite(newScene) {
@@ -2759,14 +2759,43 @@ __WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot({ selector: se
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
-/* unused harmony export Scene */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Start; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Signin; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DashBoard; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_scene__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scenes_base__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scenes_start__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__history__ = __webpack_require__(14);
+/* unused harmony reexport default */
+/* unused harmony reexport Scene */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__scenes_start__["a"]; });
 
+
+
+
+class Signin extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
+}
+
+class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("signin", data => {
+      __WEBPACK_IMPORTED_MODULE_2__history__["a" /* default */].all().then(histories => {
+        console.log(histories);
+      });
+    })
+  }
+}
+
+
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Scene; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_scene__ = __webpack_require__(0);
 
 
 class Scene {
@@ -2783,6 +2812,21 @@ class Scene {
     });
   }
 }
+
+
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Start; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__base__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(8);
+
+
 
 const loadScript = url => new Promise((resolve, reject) => {
   const el = document.createElement("script");
@@ -2814,7 +2858,7 @@ const discover = doc => {
   });
 }
 
-class Start extends Scene {
+class Start extends __WEBPACK_IMPORTED_MODULE_0__base__["b" /* default */] {
   constructor(conf) {
     super(conf);
     this.eventQueue.subscribe("start", data => {
@@ -2834,10 +2878,47 @@ class Start extends Scene {
   }
 }
 
-class Signin extends Scene {
+
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return History; });
+/* unused harmony export History */
+class History {
+  constructor(id, longUrl) {
+    this.id = id;
+    this.longUrl = longUrl;
+  }
+}
+History.all = () => all().then(histories => {
+  const set = new Set();
+  for (const item of histories) {
+    set.add(new History(item.id, item.longUrl));
+  }
+  return set;
+});
+
+const list = (token = null) => {
+  const result = gapi.client.urlshortener.url.list({
+    "start-token": token
+  });
+  return new Promise((resolve, reject) => {
+    result.then(resolve, reject)
+  });
 }
 
-class DashBoard extends Scene {
+const all = (histories = [], token = null) => {
+  return list(token).then(data => {
+    histories = histories.concat(data.result.items);
+    if (histories.length < data.result.totalItems) {
+      return all(histories, data.result.nextPageToken);
+    }
+    return Promise.resolve(histories)
+  });
 }
 
 

@@ -29,7 +29,7 @@ class App {
     this.googleUser = null;
 
     this.queue = new EventQueue([
-      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready"
+      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready", "signin"
     ]);
 
     const createMap = createComponentMap(this.el, this.queue);
@@ -75,9 +75,9 @@ class App {
     });
     return this.googleUser.grant(options)
       .then(success => {
-        this.transite("dashboard");
+        this.queue.publish("signin");
       }, fail => {
-        console.error(fail);
+        this.queue.publish("api-load-error", fail);
       }); // XXX
   }
   transite(newScene) {
