@@ -2722,7 +2722,6 @@ class App {
       if (this.scenes.has(newScene)) {
         console.log(`A scene object associated with ${newScene} is found`);
         this.scene = this.scenes.get(newScene);
-        console.log(this.scene);
         this.queue.publish("scene-transition", this.scene);
         return Promise.resolve(this);
       }
