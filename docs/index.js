@@ -72,8 +72,11 @@
 
 "use strict";
 /* unused harmony export default */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Scene; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DashBoard; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__(15);
+
 
 
 class Scene extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default */] {
@@ -91,6 +94,55 @@ class Scene extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default *
       this.eventQueue.publish("before-show", this);
     }
     super.show();
+  }
+}
+
+window.dom = __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */];
+
+const renderHistory = history => {
+  const tr = __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].tr({},
+    __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].td({}, __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].a({ href: history.longUrl }, history.longUrl)),
+    __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].td({}, history.clicks),
+    __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].td({}, __WEBPACK_IMPORTED_MODULE_1__dom__["a" /* default */].a({ href: `https://goo.gl/info/${history.id}` }, "こちら"))
+  );
+  return tr;
+};
+
+class DashBoard extends Scene {
+  constructor(conf) {
+    super(conf);
+    this.csvButton = this.el.querySelector("[data-export=csv]");
+    this.spreadsheetButton = this.el.querySelector("[data-export=spreadsheet]");
+
+    this.csvButton.disabled = true;
+    this.csvButton.addEventListener("click", e => {
+      this.eventQueue.publish("export-csv", this.histories);
+    });
+    /*
+    this.spreadsheetButton.disabled = true;
+    this.spreadsheetButton.addEventListener("click", e => {
+      this.eventQueue.publish("export-spreadsheet", this.histories);
+    });
+    */
+  }
+  update(histories) {
+    const joint = this.el.querySelector("tbody");
+    const root = document.createDocumentFragment();
+    for (const history of histories) {
+      const el = renderHistory(history);
+      root.appendChild(el);
+    }
+    this.empty();
+    joint.appendChild(root);
+    this.csvButton.disabled = false;
+
+    this.histories = histories;
+  }
+  empty() {
+    const joint = this.el.querySelector("tbody");
+    while (joint.firstChild) {
+      joint.removeChild(joint.firstChild);
+    }
   }
 }
 
@@ -2579,7 +2631,18 @@ class App {
     this.googleUser = null;
 
     this.queue = new __WEBPACK_IMPORTED_MODULE_0__event_queue__["a" /* default */]([
-      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready", "signin"
+      "scene-transition",
+      "show-dialog",
+      "start",
+      "signin",
+      "signout",
+      "ready",
+      "data-ready",
+      "dashboard-ready",
+      "load-error",
+      "data-load-error",
+      "export-csv",
+      "export-spreadsheet"
     ]);
 
     const createMap = createComponentMap(this.el, this.queue);
@@ -2610,6 +2673,29 @@ class App {
       return this.transite("signin")
         .then(app => console.log("signin"))
         .catch(error => console.error(error));
+    });
+
+    this.queue.subscribe("data-ready", histories => {
+      this.histories = histories;
+    });
+
+    this.queue.subscribe("dashboard-ready", dashboard => {
+      this.transite("dashboard");
+    });
+
+    this.queue.subscribe("export-csv", histories => {
+      const csv = histories
+        .map(history => `"${history.longUrl}","${history.clicks}"`);
+      csv.unshift("URL,count");
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, csv.join("\r\n")], { type: "text/csv;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "利用履歴.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
     });
 
     window.onSignIn = googleUser => this.signin(googleUser);
@@ -2764,9 +2850,11 @@ __WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot({ selector: se
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scenes_base__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scenes_start__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__history__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_scene__ = __webpack_require__(0);
 /* unused harmony reexport default */
 /* unused harmony reexport Scene */
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__scenes_start__["a"]; });
+
 
 
 
@@ -2777,10 +2865,19 @@ class Signin extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */]
 class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
   constructor(conf) {
     super(conf);
+    this.view = new __WEBPACK_IMPORTED_MODULE_3__components_scene__["a" /* DashBoard */]({ el: conf.el, eventQueue: conf.eventQueue });
+    this.view.hide();
+    this.histories = null;
+
     this.eventQueue.subscribe("signin", data => {
       __WEBPACK_IMPORTED_MODULE_2__history__["a" /* default */].all().then(histories => {
-        console.log(histories);
-      });
+        return Promise.all(histories.map(item => item.loadAnalytics()));
+      }).then(histories => {
+        this.histories = histories;
+        this.eventQueue.publish("data-ready", histories);
+        this.view.update(this.histories);
+        this.eventQueue.publish("dashboard-ready", this);
+      }).catch(error => this.eventQueue.publish("data-load-error"));
     })
   }
 }
@@ -2800,7 +2897,7 @@ class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene 
 
 class Scene {
   constructor({ el, eventQueue }) {
-    this.view = new __WEBPACK_IMPORTED_MODULE_0__components_scene__["a" /* Scene */]({ el: el, eventQueue: eventQueue });
+    this.view = new __WEBPACK_IMPORTED_MODULE_0__components_scene__["b" /* Scene */]({ el: el, eventQueue: eventQueue });
     this.view.hide();
     this.eventQueue = eventQueue;
     this.eventQueue.subscribe("scene-transition", nextScene => {
@@ -2890,17 +2987,35 @@ class Start extends __WEBPACK_IMPORTED_MODULE_0__base__["b" /* default */] {
 /* unused harmony export History */
 class History {
   constructor(id, longUrl) {
-    this.id = id;
+    this.shortUrl = new URL(id);
     this.longUrl = longUrl;
+    this.id = this.shortUrl.pathname.substr(1);
+    this.month = null;
+  }
+  loadAnalytics() {
+    if (this.month != null) {
+      return Promise.resolve(this);
+    }
+    return new Promise((resolve, reject) => {
+      gapi.client.urlshortener.url.get({
+        shortUrl: this.shortUrl,
+        projection: "ANALYTICS_CLICKS"
+      }).then(res => {
+        this.month = res.result.analytics.month;
+        resolve(this);
+      }, reject)
+    });
+  }
+  get clicks() {
+    if (this.month == null) {
+      return -1;
+    }
+    return this.month.shortUrlClicks;
   }
 }
-History.all = () => all().then(histories => {
-  const set = new Set();
-  for (const item of histories) {
-    set.add(new History(item.id, item.longUrl));
-  }
-  return set;
-});
+History.all = () => {
+  return all().then(histories => histories.map(item => new History(item.id, item.longUrl)));
+};
 
 const list = (token = null) => {
   const result = gapi.client.urlshortener.url.list({
@@ -2923,6 +3038,68 @@ const all = (histories = [], token = null) => {
 
 
 
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return dom; });
+/* unused harmony export tr */
+/* unused harmony export td */
+/* unused harmony export a */
+/* unused harmony export createElement */
+const toA = list => Array.prototype.concat.apply([], list);
+
+function createElement() {
+  const args = toA(arguments);
+  const name = args.shift();
+  const options = args.shift() || {};
+  const children = args;
+
+  if (name == null) {
+    return null;
+  }
+  const el = document.createElement(name);
+  if ((options.className || {}).length > 0) {
+    for (const klass of options.className) {
+      el.classList.add(klass);
+    }
+  }
+  if (options.href != null) {
+    el.href = options.href;
+  }
+
+  if (children.length > 0) {
+    for (let child of children) {
+      if (typeof child === "string") {
+        child = document.createTextNode(child);
+      }
+      el.appendChild(child);
+    }
+  }
+  return el;
+}
+
+const factory = name => function () {
+  const args = toA(arguments);
+  args.unshift(name);
+  return createElement.apply(null, args)
+};
+
+const tr = factory("tr");
+const td = factory("td");
+const a = factory("a");
+
+const dom = {
+  tr: tr,
+  td: td,
+  a: a,
+  createElement: createElement
+};
+
+
+  
 
 /***/ })
 /******/ ]);

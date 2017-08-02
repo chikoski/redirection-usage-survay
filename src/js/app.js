@@ -29,7 +29,18 @@ class App {
     this.googleUser = null;
 
     this.queue = new EventQueue([
-      "scene-transition", "show-dialog", "start", "signout", "load-error", "ready", "signin"
+      "scene-transition",
+      "show-dialog",
+      "start",
+      "signin",
+      "signout",
+      "ready",
+      "data-ready",
+      "dashboard-ready",
+      "load-error",
+      "data-load-error",
+      "export-csv",
+      "export-spreadsheet"
     ]);
 
     const createMap = createComponentMap(this.el, this.queue);
@@ -60,6 +71,29 @@ class App {
       return this.transite("signin")
         .then(app => console.log("signin"))
         .catch(error => console.error(error));
+    });
+
+    this.queue.subscribe("data-ready", histories => {
+      this.histories = histories;
+    });
+
+    this.queue.subscribe("dashboard-ready", dashboard => {
+      this.transite("dashboard");
+    });
+
+    this.queue.subscribe("export-csv", histories => {
+      const csv = histories
+        .map(history => `"${history.longUrl}","${history.clicks}"`);
+      csv.unshift("URL,count");
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, csv.join("\r\n")], { type: "text/csv;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "利用履歴.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
     });
 
     window.onSignIn = googleUser => this.signin(googleUser);
