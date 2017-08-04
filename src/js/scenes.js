@@ -4,6 +4,12 @@ import History from "./history";
 import { DashBoard as View } from "./components/scene";
 
 class Signin extends Scene {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("signin", data => {
+      this.view.hide();
+    });
+  }
 }
 
 class DashBoard extends Scene {
@@ -26,5 +32,17 @@ class DashBoard extends Scene {
   }
 }
 
+class DataLoading extends Scene {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("signin", data => {
+      this.view.show();
+    });
+    this.eventQueue.subscribe("dashboard-ready", data => {
+      this.view.hide();
+    })
+  }
+}
+
 export { Scene as default };
-export { Scene, Start, Signin, DashBoard };
+export { Scene, Start, Signin, DashBoard, DataLoading };

@@ -1,6 +1,6 @@
 import EventQueue from "./event-queue";
 import { Scene as SceneView, Dialog } from "./component";
-import { Start, DashBoard, Signin } from "./scenes";
+import { Start, DashBoard, Signin, DataLoading } from "./scenes";
 import { SCOPES } from "./constants";
 
 const toA = list => Array.prototype.concat.apply([], list);
@@ -48,7 +48,8 @@ class App {
     this.scenes = associate({
       "start": Start,
       "signin": Signin,
-      "dashboard": DashBoard
+      "dashboard": DashBoard,
+      "loading-data": DataLoading,
     }, this.queue);
 
     this.queue.subscribe("show-dialog", error => {
@@ -71,6 +72,10 @@ class App {
       return this.transite("signin")
         .then(app => console.log("signin"))
         .catch(error => console.error(error));
+    });
+
+    this.queue.subscribe("signin", data => {
+
     });
 
     this.queue.subscribe("data-ready", histories => {

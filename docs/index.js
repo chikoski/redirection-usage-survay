@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -75,7 +75,7 @@
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Scene; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DashBoard; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ui_component__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__(10);
 
 
 
@@ -196,10 +196,62 @@ class UIComponent {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return API; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SCOPES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DISCOVER_DOCS; });
+const API = "https://apis.google.com/js/api.js";
+
+const SCOPES = [
+  "https://www.googleapis.com/auth/urlshortener",
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive",
+  "https://www.googleapis.com/auth/drive.file"
+];
+
+const DISCOVER_DOCS = [
+  "https://www.googleapis.com/discovery/v1/apis/urlshortener/v1/rest",
+  "https://sheets.googleapis.com/$discovery/rest?version=v4"
+];
+
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Scene; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_scene__ = __webpack_require__(0);
+
+
+class Scene {
+  constructor({ el, eventQueue }) {
+    this.view = new __WEBPACK_IMPORTED_MODULE_0__components_scene__["b" /* Scene */]({ el: el, eventQueue: eventQueue });
+    this.view.hide();
+    this.eventQueue = eventQueue;
+    this.eventQueue.subscribe("scene-transition", nextScene => {
+      if (nextScene == this) {
+        this.view.show();
+      } else {
+        this.view.hide();
+      }
+    });
+  }
+}
+
+
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Bootloader; });
 /* unused harmony export Bootloader */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_localforage___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_localforage__);
 
 
@@ -244,7 +296,7 @@ const Bootloader = {
 
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var require;var require;/*!
@@ -2560,10 +2612,10 @@ module.exports = localforage_js;
 
 },{"3":3}]},{},[4])(4)
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports) {
 
 var g;
@@ -2590,16 +2642,16 @@ module.exports = g;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return App; });
 /* unused harmony export App */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__event_queue__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scenes__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__event_queue__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scenes__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(2);
 
 
 
@@ -2650,7 +2702,8 @@ class App {
     this.scenes = associate({
       "start": __WEBPACK_IMPORTED_MODULE_2__scenes__["a" /* Start */],
       "signin": __WEBPACK_IMPORTED_MODULE_2__scenes__["b" /* Signin */],
-      "dashboard": __WEBPACK_IMPORTED_MODULE_2__scenes__["c" /* DashBoard */]
+      "dashboard": __WEBPACK_IMPORTED_MODULE_2__scenes__["c" /* DashBoard */],
+      "loading-data": __WEBPACK_IMPORTED_MODULE_2__scenes__["d" /* DataLoading */],
     }, this.queue);
 
     this.queue.subscribe("show-dialog", error => {
@@ -2673,6 +2726,10 @@ class App {
       return this.transite("signin")
         .then(app => console.log("signin"))
         .catch(error => console.error(error));
+    });
+
+    this.queue.subscribe("signin", data => {
+
     });
 
     this.queue.subscribe("data-ready", histories => {
@@ -2734,11 +2791,11 @@ class App {
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_dialog__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_dialog__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_scene__ = __webpack_require__(0);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__components_dialog__["a"]; });
 /* unused harmony reexport Scene */
@@ -2748,7 +2805,7 @@ class App {
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2769,31 +2826,69 @@ class Dialog extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default 
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return API; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SCOPES; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DISCOVER_DOCS; });
-const API = "https://apis.google.com/js/api.js";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return dom; });
+/* unused harmony export tr */
+/* unused harmony export td */
+/* unused harmony export a */
+/* unused harmony export createElement */
+const toA = list => Array.prototype.concat.apply([], list);
 
-const SCOPES = [
-  "https://www.googleapis.com/auth/urlshortener",
-  "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/drive.file"
-];
+function createElement() {
+  const args = toA(arguments);
+  const name = args.shift();
+  const options = args.shift() || {};
+  const children = args;
 
-const DISCOVER_DOCS = [
-  "https://www.googleapis.com/discovery/v1/apis/urlshortener/v1/rest",
-  "https://sheets.googleapis.com/$discovery/rest?version=v4"
-];
+  if (name == null) {
+    return null;
+  }
+  const el = document.createElement(name);
+  if ((options.className || {}).length > 0) {
+    for (const klass of options.className) {
+      el.classList.add(klass);
+    }
+  }
+  if (options.href != null) {
+    el.href = options.href;
+  }
+
+  if (children.length > 0) {
+    for (let child of children) {
+      if (typeof child === "string") {
+        child = document.createTextNode(child);
+      }
+      el.appendChild(child);
+    }
+  }
+  return el;
+}
+
+const factory = name => function () {
+  const args = toA(arguments);
+  args.unshift(name);
+  return createElement.apply(null, args)
+};
+
+const tr = factory("tr");
+const td = factory("td");
+const a = factory("a");
+
+const dom = {
+  tr: tr,
+  td: td,
+  a: a,
+  createElement: createElement
+};
 
 
+  
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2826,159 +2921,7 @@ class EventQueue {
 
 
 /***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bootloader__ = __webpack_require__(2);
-
-
-const selector = "#app";
-const attributes = ["spreadsheetUrl"];
-
-__WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot({ selector: selector, attributes: attributes });
-
-/***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Signin; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DashBoard; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scenes_base__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scenes_start__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__history__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_scene__ = __webpack_require__(0);
-/* unused harmony reexport default */
-/* unused harmony reexport Scene */
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__scenes_start__["a"]; });
-
-
-
-
-
-class Signin extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
-}
-
-class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
-  constructor(conf) {
-    super(conf);
-    this.view = new __WEBPACK_IMPORTED_MODULE_3__components_scene__["a" /* DashBoard */]({ el: conf.el, eventQueue: conf.eventQueue });
-    this.view.hide();
-    this.histories = null;
-
-    this.eventQueue.subscribe("signin", data => {
-      __WEBPACK_IMPORTED_MODULE_2__history__["a" /* default */].all().then(histories => {
-        return Promise.all(histories.map(item => item.loadAnalytics()));
-      }).then(histories => {
-        this.histories = histories;
-        this.eventQueue.publish("data-ready", histories);
-        this.view.update(this.histories);
-        this.eventQueue.publish("dashboard-ready", this);
-      }).catch(error => this.eventQueue.publish("data-load-error"));
-    })
-  }
-}
-
-
-
-
-/***/ }),
 /* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Scene; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scene; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_scene__ = __webpack_require__(0);
-
-
-class Scene {
-  constructor({ el, eventQueue }) {
-    this.view = new __WEBPACK_IMPORTED_MODULE_0__components_scene__["b" /* Scene */]({ el: el, eventQueue: eventQueue });
-    this.view.hide();
-    this.eventQueue = eventQueue;
-    this.eventQueue.subscribe("scene-transition", nextScene => {
-      if (nextScene == this) {
-        this.view.show();
-      } else {
-        this.view.hide();
-      }
-    });
-  }
-}
-
-
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export default */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Start; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__base__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(8);
-
-
-
-const loadScript = url => new Promise((resolve, reject) => {
-  const el = document.createElement("script");
-  el.src = url;
-  el.addEventListener("load", e => {
-    return resolve();
-  }, { once: true });
-  el.addEventListener("error", e => {
-    return reject(e);
-  }, { once: true });
-  document.body.appendChild(el);
-});
-
-const initGAPIClient = () => {
-  return new Promise((resolve, reject) => {
-    gapi.load("client", {
-      callback: () => resolve(),
-      onerror: () => reject("load error"),
-      timeout: 5000,
-      ontimeout: () => reject("timeout")
-    });
-  });
-}
-
-const discover = doc => {
-  console.log(doc);
-  return new Promise((resolve, reject) => {
-    gapi.client.load(doc).then(success => resolve(success), fail => reject(fail));
-  });
-}
-
-class Start extends __WEBPACK_IMPORTED_MODULE_0__base__["b" /* default */] {
-  constructor(conf) {
-    super(conf);
-    this.eventQueue.subscribe("start", data => {
-      this.view.show();
-      this.loadAPI();
-    });
-  }
-  loadAPI() {
-    return loadScript(__WEBPACK_IMPORTED_MODULE_1__constants__["b" /* API */])
-      .then(initGAPIClient)
-      .then(() => {
-        console.log("discover");
-        Promise.all(__WEBPACK_IMPORTED_MODULE_1__constants__["c" /* DISCOVER_DOCS */].map(doc => discover(doc)))
-      })
-      .then(() => this.eventQueue.publish("ready"))
-      .catch(error => this.eventQueue.publish("api-load-error", error))
-  }
-}
-
-
-
-
-/***/ }),
-/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3039,66 +2982,147 @@ const all = (histories = [], token = null) => {
 
 
 /***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bootloader__ = __webpack_require__(4);
+
+
+const selector = "#app";
+const attributes = ["spreadsheetUrl"];
+
+__WEBPACK_IMPORTED_MODULE_0__bootloader__["a" /* default */].boot({ selector: selector, attributes: attributes });
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Signin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DashBoard; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return DataLoading; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scenes_base__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scenes_start__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__history__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_scene__ = __webpack_require__(0);
+/* unused harmony reexport default */
+/* unused harmony reexport Scene */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__scenes_start__["a"]; });
+
+
+
+
+
+class Signin extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("signin", data => {
+      this.view.hide();
+    });
+  }
+}
+
+class DashBoard extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
+  constructor(conf) {
+    super(conf);
+    this.view = new __WEBPACK_IMPORTED_MODULE_3__components_scene__["a" /* DashBoard */]({ el: conf.el, eventQueue: conf.eventQueue });
+    this.view.hide();
+    this.histories = null;
+
+    this.eventQueue.subscribe("signin", data => {
+      __WEBPACK_IMPORTED_MODULE_2__history__["a" /* default */].all().then(histories => {
+        return Promise.all(histories.map(item => item.loadAnalytics()));
+      }).then(histories => {
+        this.histories = histories;
+        this.eventQueue.publish("data-ready", histories);
+        this.view.update(this.histories);
+        this.eventQueue.publish("dashboard-ready", this);
+      }).catch(error => this.eventQueue.publish("data-load-error"));
+    })
+  }
+}
+
+class DataLoading extends __WEBPACK_IMPORTED_MODULE_0__scenes_base__["a" /* Scene */] {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("signin", data => {
+      this.view.show();
+    });
+    this.eventQueue.subscribe("dashboard-ready", data => {
+      this.view.hide();
+    })
+  }
+}
+
+
+
+
+/***/ }),
 /* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return dom; });
-/* unused harmony export tr */
-/* unused harmony export td */
-/* unused harmony export a */
-/* unused harmony export createElement */
-const toA = list => Array.prototype.concat.apply([], list);
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Start; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__base__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(2);
 
-function createElement() {
-  const args = toA(arguments);
-  const name = args.shift();
-  const options = args.shift() || {};
-  const children = args;
 
-  if (name == null) {
-    return null;
-  }
-  const el = document.createElement(name);
-  if ((options.className || {}).length > 0) {
-    for (const klass of options.className) {
-      el.classList.add(klass);
-    }
-  }
-  if (options.href != null) {
-    el.href = options.href;
-  }
 
-  if (children.length > 0) {
-    for (let child of children) {
-      if (typeof child === "string") {
-        child = document.createTextNode(child);
-      }
-      el.appendChild(child);
-    }
-  }
-  return el;
+const loadScript = url => new Promise((resolve, reject) => {
+  const el = document.createElement("script");
+  el.src = url;
+  el.addEventListener("load", e => {
+    return resolve();
+  }, { once: true });
+  el.addEventListener("error", e => {
+    return reject(e);
+  }, { once: true });
+  document.body.appendChild(el);
+});
+
+const initGAPIClient = () => {
+  return new Promise((resolve, reject) => {
+    gapi.load("client", {
+      callback: () => resolve(),
+      onerror: () => reject("load error"),
+      timeout: 5000,
+      ontimeout: () => reject("timeout")
+    });
+  });
 }
 
-const factory = name => function () {
-  const args = toA(arguments);
-  args.unshift(name);
-  return createElement.apply(null, args)
-};
+const discover = doc => {
+  console.log(doc);
+  return new Promise((resolve, reject) => {
+    gapi.client.load(doc).then(success => resolve(success), fail => reject(fail));
+  });
+}
 
-const tr = factory("tr");
-const td = factory("td");
-const a = factory("a");
+class Start extends __WEBPACK_IMPORTED_MODULE_0__base__["b" /* default */] {
+  constructor(conf) {
+    super(conf);
+    this.eventQueue.subscribe("start", data => {
+      this.view.show();
+      this.loadAPI();
+    });
+  }
+  loadAPI() {
+    return loadScript(__WEBPACK_IMPORTED_MODULE_1__constants__["b" /* API */])
+      .then(initGAPIClient)
+      .then(() => {
+        console.log("discover");
+        Promise.all(__WEBPACK_IMPORTED_MODULE_1__constants__["c" /* DISCOVER_DOCS */].map(doc => discover(doc)))
+      })
+      .then(() => this.eventQueue.publish("ready"))
+      .catch(error => this.eventQueue.publish("api-load-error", error))
+  }
+}
 
-const dom = {
-  tr: tr,
-  td: td,
-  a: a,
-  createElement: createElement
-};
 
 
-  
 
 /***/ })
 /******/ ]);
