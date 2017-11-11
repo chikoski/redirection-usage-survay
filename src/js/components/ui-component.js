@@ -28,6 +28,10 @@ class UIComponent {
     }
     return this;
   }
+  subscribe(eventName, handler) {
+    handler = handler.bind(this);
+    this.eventQueue.subscribe(eventName, handler);
+  }
 }
 
 export { UIComponent as default };

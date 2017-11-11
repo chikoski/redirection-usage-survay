@@ -186,6 +186,10 @@ class UIComponent {
     }
     return this;
   }
+  subscribe(eventName, handler) {
+    handler = handler.bind(this);
+    this.eventQueue.subscribe(eventName, handler);
+  }
 }
 
 
@@ -2815,10 +2819,13 @@ class App {
 
 
 class Dialog extends __WEBPACK_IMPORTED_MODULE_0__ui_component__["a" /* default */] {
-  constructor({ el, eventQueue }) {
+  constructor({ el, eventQueue, onCreate }) {
     super({ el, eventQueue, eventName: "show-dialog" });
     eventQueue.subscribe("start", data => this.hide());
     el.querySelector("button").addEventListener("click", e => this.hide());
+    if (typeof onCreate === "function") {
+      onCreate.call(this);
+    }
   }
 }
 
