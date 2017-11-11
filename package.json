@@ -15,6 +15,10 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "serve": "http-server -p 8080 -c-1 docs"
+    "serve": "http-server -p 8080 -c-1 docs",
+    "scrape": "node src/scraper/index.js"
+  },
+  "dependencies": {
+    "chromy": "^0.5.6"
   }
 }
