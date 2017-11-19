@@ -18,9 +18,9 @@ function resetOnClick(selector) {
 	setHandler(selector, "click", handler);
 }
 
-function setLogger(selector) {
-	const hander = event => {
-		const destination = event.target.href;
+function logger(element) {
+	return event => {
+		const destination = element.href;
 		if (destination == null) {
 			return;
 		}
@@ -28,7 +28,12 @@ function setLogger(selector) {
 		fetch(url, { mode: "no-cors" })
 			.then(() => { }, () => { });
 	}
-	setHandler(selector, "click", hander);
+}
+
+function setLogger(selector) {
+	findAll(selector)
+		.map(i => [i, logger(i)])
+		.forEach(i => i[0].addEventListener("click", i[1]));
 }
 
 function start() {
