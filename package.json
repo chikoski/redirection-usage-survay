@@ -16,9 +16,12 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "serve": "http-server -p 8080 -c-1 docs",
-    "scrape": "node src/scraper/index.js"
+    "scraper": "node src/scraper/index.js",
+    "scraper::latest": "node src/scraper/index.js -l",
+    "scraper::help": "node src/scraper/index.js -h"
   },
   "dependencies": {
-    "chromy": "^0.5.6"
+    "chromy": "^0.5.6",
+    "optparse": "^1.0.5"
   }
 }
